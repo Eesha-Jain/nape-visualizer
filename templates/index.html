@@ -8,17 +8,17 @@
 
 <body>
 
-    <h1>Plotly Bar Chart Example</h1>
+    <h1>Plotly Chart Example</h1>
 
-    <!-- The container for the plotly bar chart -->
-    <div id="bar-chart-container"></div>
+    <!-- The container for the plotly chart -->
+    <div id="chart-container"></div>
 
     <script type="text/javascript">
         // Get the graph data from the Flask app
         var graphJSON = {{ graphJSON | safe }};
 
-        // Render the Plotly bar chart inside the container
-        Plotly.react('bar-chart-container', graphJSON.data, graphJSON.layout);
+        // Render the Plotly chart inside the container
+        Plotly.react('chart-container', graphJSON.data, graphJSON.layout);
     </script>
 
 </body>
