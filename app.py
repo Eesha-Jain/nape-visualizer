@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import os
 import numpy as np
 import glob
@@ -8,7 +8,6 @@ import seaborn as sns
 import matplotlib.ticker as ticker
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-
 import matplotlib.pyplot as plt
 import matplotlib
 import plotly.express as px
@@ -22,40 +21,30 @@ import utils
 
 app = Flask(__name__)
 
-def define_params(method = 'single'):
+# method options are 'single', 'f2a', 'root_dir'
+def define_params(fs = 5, opto_blank_frame = False, num_rois = 10, selected_conditions = None, flag_normalization = "dff_perc"):
     
     fparams = {}
     
-    if method == 'single':
-        
-        fparams['fname_signal'] = 'VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv'   # 
-        fparams['fname_events'] = 'event_times_VJ_OFCVTA_7_260_D6_trained.csv' # can set to None if you want to plot the signals only
-        # fdir signifies to the root path of the data. Currently, the abspath phrase points to sample data from the repo.
-        # To specify a path that is on your local computer, use this string format: r'your_root_path', where you should copy/paste
-        # your path between the single quotes (important to keep the r to render as a complete raw string). See example below:
-        # r'C:\Users\stuberadmin\Documents\GitHub\NAPE_imaging_postprocess\napeca_post\sample_data' 
-        fparams['fdir'] = os.path.abspath('./sample_data/VJ_OFCVTA_7_260_D6') 
-        fparams['fname'] = os.path.split(fparams['fdir'])[1]
+    fparams['fname_signal'] = 'VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv'   # 
+    fparams['fname_events'] = 'event_times_VJ_OFCVTA_7_260_D6_trained.csv' # can set to None if you want to plot the signals only
+    # fdir signifies to the root path of the data. Currently, the abspath phrase points to sample data from the repo.
+    # To specify a path that is on your local computer, use this string format: r'your_root_path', where you should copy/paste
+    # your path between the single quotes (important to keep the r to render as a complete raw string). See example below:
+    # r'C:\Users\stuberadmin\Documents\GitHub\NAPE_imaging_postprocess\napeca_post\sample_data' 
+    fparams['fdir'] = os.path.abspath('./sample_data/VJ_OFCVTA_7_260_D6') 
+    fparams['fname'] = os.path.split(fparams['fdir'])[1]
 
-        # set the sampling rate
-        fparams['fs'] = 5
+    # set the sampling rate
+    fparams['fs'] = fs
 
-        # session info
-        fparams['opto_blank_frame'] = False # if PMTs were blanked during stim, set stim times to nan (instead of 0)
-        
-        # analysis and plotting arguments
-        fparams['num_rois'] = 10 # set to 'all' if want to show all cells
-        fparams['selected_conditions'] = None # set to None if want to include all conditions from behav data
-        fparams['flag_normalization'] = 'dff_perc' # options: 'dff', 'zscore', 'dff_perc', None
-        
-       
-    elif method == 'f2a': # if string is empty, load predefined list of files in files_to_analyze_event
-
-        fparams = files_to_analyze_event.define_fparams()
-
-    elif method == 'root_dir':
-        
-        pass
+    # session info
+    fparams['opto_blank_frame'] = opto_blank_frame # if PMTs were blanked during stim, set stim times to nan (instead of 0)
+    
+    # analysis and plotting arguments
+    fparams['num_rois'] = num_rois # set to 'all' if want to show all cells
+    fparams['selected_conditions'] = selected_conditions # set to None if want to include all conditions from behav data
+    fparams['flag_normalization'] = flag_normalization # options: 'dff', 'zscore', 'dff_perc', None
 
     return fparams
 
@@ -69,8 +58,7 @@ def calc_zscore(activity_vec, baseline_samples):
     std_baseline = np.nanstd(data[..., baseline_samples])
     return (data-mean_baseline)/std_baseline
 
-def generateGraph():
-    fparams = define_params(method = 'single') # options are 'single', 'f2a', 'root_dir'
+def generateGraph(fparams):
     cond_colors = ['steelblue', 'crimson', 'orchid', 'gold']
 
     fext = os.path.splitext(fparams['fname_signal'])[-1]
@@ -215,20 +203,23 @@ def generateGraph():
 
     return fig
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # Sample data for the bar chart
-    x_values = ['A', 'B', 'C', 'D']
-    y_values = [10, 25, 5, 15]
+    if request.method == "POST":
+        fs = int(request.form.get('fs'))
+        opto_blank_frame = False if request.form.get('opto_blank_frame') == "false" else True
+        num_rois = "all" if request.form.get('num_rois') == "all" else int(request.form.get('num_rois'))
+        selected_conditions = None if request.form.get('selected_conditions') == "None" else request.form.get('selected_conditions')
+        flag_normalization = request.form.get('flag_normalization')
 
-    # Create a Plotly chart
-    chart = generateGraph()
-
-    # Convert the chart to JSON to pass to the template
+        fparams = define_params(fs = fs, opto_blank_frame = opto_blank_frame, num_rois = num_rois, selected_conditions = selected_conditions, flag_normalization = flag_normalization)
+    else:
+        fparams = define_params()
+    
+    chart = generateGraph(fparams)
     graphJSON = chart.to_json()
 
-    # Render the template with the graph data
-    return render_template('index.html', graphJSON=graphJSON)
+    return render_template('index.html', graphJSON=graphJSON, fparams=fparams)
 
 if __name__ == '__main__':
     app.run(debug=True)
