@@ -1,0 +1,36 @@
+
+ >>>>> started run at 21/03/2022 12:57:45{'data_path': ['C:/Users/stuberadmin/Documents/GitHub/tmp'], 'subfolders': [], 'h5py_key': 'imaging', 'save_path0': 'C:/Users/stuberadmin/Documents/GitHub/tmp', 'fast_disk': 'C:/Users/stuberadmin/Documents/GitHub/tmp', 'input_format': 'h5'}
+h5
+** Found 1 h5 files - converting to binary **
+NOTE: using a list of h5 files:
+['C:/Users/stuberadmin/Documents/GitHub/tmp\\VJ_OFCVTA_7_260_D6_offset.h5']
+time 0.07 sec. Wrote 201 frames per binary for 1 planes
+>>>>>>>>>>>>>>>>>>>>> PLANE 0 <<<<<<<<<<<<<<<<<<<<<<
+NOTE: not registered / registration forced with ops['do_registration']>1
+      (no previous offsets to delete)
+----------- REGISTRATION
+registering 201 frames
+Reference frame, 1.67 sec.
+added enhanced mean image
+----------- Total 3.62 sec
+NOTE: applying default C:\Users\stuberadmin\.suite2p\classifiers\classifier_user.npy
+----------- ROI DETECTION
+Binning movie in chunks of length 08
+Binned movie [25,128,235] in 0.03 sec.
+NOTE: estimated spatial scale ~6 pixels, time epochs 1.00, threshold 5.00 
+0 ROIs, score=23.00
+Detected 55 ROIs, 0.85 sec
+After removing overlaps, 55 ROIs remain
+----------- Total 1.06 sec.
+----------- EXTRACTION
+Masks created, 0.13 sec.
+Extracted fluorescence from 55 ROIs in 201 frames, 3.90 sec.
+----------- Total 4.05 sec.
+----------- CLASSIFICATION
+['skew', 'compact', 'npix_norm']
+----------- Total 0.05 sec.
+----------- SPIKE DECONVOLUTION
+----------- Total 0.00 sec.
+Plane 0 processed in 8.78 sec (can open in GUI).
+total = 8.86 sec.
+TOTAL RUNTIME 8.86 sec
