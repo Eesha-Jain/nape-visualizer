@@ -18,6 +18,7 @@ matplotlib.rcParams['ps.fonttype']=42
 plt.rcParams["font.family"] = "Arial"
 
 import utils
+import run_sima
 
 app = Flask(__name__)
 
@@ -205,6 +206,8 @@ def generateGraph(fparams):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    #run_sima.run()
+
     if request.method == "POST":
         fs = int(request.form.get('fs'))
         opto_blank_frame = False if request.form.get('opto_blank_frame') == "false" else True
