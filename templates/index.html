@@ -10,7 +10,13 @@
 
     <h1>NAPE Center Visualization</h1>
 
-    <form action="{{ url_for('index') }}" method="post">
+    <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
+        <label for="fsignal">Upload Signal CSV:</label><br>
+        <input type="file" id="fsignal" name="fsignal" required><br><br>
+
+        <label for="fevents">Upload Events CSV:</label><br>
+        <input type="file" id="fevents" name="fevents" required><br><br>
+
         <label for="fs">Sampling Rate:</label><br>
         <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
 
@@ -45,6 +51,7 @@
         Plotly.react('chart-container', graphJSON.data, graphJSON.layout);
     </script>
 
+    <br /><br />
 </body>
 
 </html>

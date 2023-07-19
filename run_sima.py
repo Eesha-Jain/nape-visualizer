@@ -1,5 +1,3 @@
-#import sima and other dependents
-
 import sima
 import sima.motion
 from sima.motion import HiddenMarkov2D
@@ -7,15 +5,7 @@ import numpy as np
 import os
 import pickle
 import h5py
-
-# define file path and name
-filename = 'VJ_OFCVTA_7_260_D6_offset'
-folder = r'C:\Users\Eesha\Documents\GitHub\sima_visualization\generated\\'
-tif_h5 = 1 # USER DEFINE: 0 for tiff, 1 for h5
-
-segment_file = 'VJ_OFCVTA_7_260_D6_offset_mc.sima' #'VJ_OFC_6_D6.sima'
-segment_dir = 'C:\\Users\\Eesha\\Documents\\GitHub\\sima_visualization\\generated\\'
-
+import shutil
 
 def fill_gaps(framenumber, sequence, frame_iter1):  # adapted from SIMA source code/Vijay Namboodiri
     first_obs = next(frame_iter1)
@@ -33,7 +23,19 @@ def fill_gaps(framenumber, sequence, frame_iter1):  # adapted from SIMA source c
                 for mr_ch, fo_ch in zip(most_recent, first_obs)]
         framenumber = yield np.array(temp)[0, :, :, 0]
 
+# define file path and name
+filename = 'VJ_OFCVTA_7_260_D6_offset'
+
+folder = r'C:\Users\Eesha\Documents\GitHub\sima_visualization\generated\\'
+
+tif_h5 = 1 # USER DEFINE: 0 for tiff, 1 for h5
+
+segment_file = 'VJ_OFCVTA_7_260_D6_offset_mc.sima' #'VJ_OFC_6_D6.sima'
+segment_dir = 'C:\\Users\\Eesha\\Documents\\GitHub\\sima_visualization\\generated\\'
+segment_path = os.path.join(segment_dir, segment_file)
+
 def run():
+    global sima
     # get full path of file and load via sima
 
     if tif_h5 == 0:
@@ -47,8 +49,6 @@ def run():
         
         datafile = os.path.join(folder, '%s.h5'%filename)
         sequences = [sima.Sequence.create('HDF5', datafile, 'tyx')]
-        
-    sequences[0].shape
 
     mc_approach = sima.motion.HiddenMarkov2D(granularity='row', max_displacement=[10, 10], n_processes = 1, verbose=True)
 
@@ -64,7 +64,6 @@ def run():
     hf.create_dataset('rows', data=row_slice)
     hf.create_dataset('columns', data=column_slice)
     hf.close()
-
 
     dataset = sima.ImagingDataset.load(os.path.join(folder, filename + '_mc.sima'))
     sequence_data = dataset.sequences[0]
@@ -108,7 +107,7 @@ def run():
     disp_meanpix = np.mean( disp_np, axis=1 ) # avg across lines (y axis)
 
     sima_disp = np.sqrt( np.square(disp_meanpix[:,0]) + np.square(disp_meanpix[:,1]) ) # calculate composite x + y offsets
-    np.save(folder + '\\displacements\\displacements_sima.npy', sima_disp)
+    np.save(segment_dir + 'displacements\\displacements_sima.npy', sima_disp)
 
     import sima.segment
     stica_approach = sima.segment.STICA(components=5)
@@ -116,14 +115,15 @@ def run():
     stica_approach.append(sima.segment.SmoothROIBoundaries())
     stica_approach.append(sima.segment.MergeOverlapping(threshold=0.5))
 
-    segment_path = os.path.join(segment_dir, segment_file)
-
     dataset = sima.ImagingDataset.load(segment_path)
     rois = dataset.segment(stica_approach, 'auto_ROIs')
 
-    print("Extracting signals.")
-    dataset.extract(signal_channel='GCaMP', label='GCaMP_signals', n_processes=16)
+    import matplotlib.pyplot as plt
 
-    print("Exporting GCaMP time series.")
-    print(segment_path + 'example_signals.csv')
+    np.array( rois[0].mask[0][0] )
+
+    #plt.imshow(rois[0].mask)
+
+    dataset.extract(signal_channel='GCaMP', label='GCaMP_signals', n_processes=16) # 16 processes: 5 min 19 s
+
     dataset.export_signals(segment_path + '_example_signals.csv')

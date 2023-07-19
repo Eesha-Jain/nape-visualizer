@@ -23,17 +23,17 @@ import run_sima
 app = Flask(__name__)
 
 # method options are 'single', 'f2a', 'root_dir'
-def define_params(fs = 5, opto_blank_frame = False, num_rois = 10, selected_conditions = None, flag_normalization = "dff_perc"):
+def define_params(fs = 5, opto_blank_frame = False, num_rois = 10, selected_conditions = None, flag_normalization = "dff_perc", fsignal = "VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv", fevents="event_times_VJ_OFCVTA_7_260_D6_trained.csv"):
     
     fparams = {}
     
-    fparams['fname_signal'] = 'VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv'   # 
-    fparams['fname_events'] = 'event_times_VJ_OFCVTA_7_260_D6_trained.csv' # can set to None if you want to plot the signals only
+    fparams['fname_signal'] = fsignal   # 
+    fparams['fname_events'] = fevents # can set to None if you want to plot the signals only
     # fdir signifies to the root path of the data. Currently, the abspath phrase points to sample data from the repo.
     # To specify a path that is on your local computer, use this string format: r'your_root_path', where you should copy/paste
     # your path between the single quotes (important to keep the r to render as a complete raw string). See example below:
     # r'C:\Users\stuberadmin\Documents\GitHub\NAPE_imaging_postprocess\napeca_post\sample_data' 
-    fparams['fdir'] = os.path.abspath('./sample_data/VJ_OFCVTA_7_260_D6') 
+    fparams['fdir'] = os.path.abspath('./sample_data/') 
     fparams['fname'] = os.path.split(fparams['fdir'])[1]
 
     # set the sampling rate
@@ -215,7 +215,13 @@ def index():
         selected_conditions = None if request.form.get('selected_conditions') == "None" else request.form.get('selected_conditions')
         flag_normalization = request.form.get('flag_normalization')
 
-        fparams = define_params(fs = fs, opto_blank_frame = opto_blank_frame, num_rois = num_rois, selected_conditions = selected_conditions, flag_normalization = flag_normalization)
+        fsignal = request.files["fsignal"]
+        fevents = request.files["fevents"]
+
+        fsignal.save("./sample_data/" + fsignal.filename)
+        fevents.save("./sample_data/" + fevents.filename)
+
+        fparams = define_params(fs = fs, opto_blank_frame = opto_blank_frame, num_rois = num_rois, selected_conditions = selected_conditions, flag_normalization = flag_normalization, fsignal=fsignal.filename, fevents=fevents.filename)
     else:
         fparams = define_params()
     
