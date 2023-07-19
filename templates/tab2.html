@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>NAPE Center Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='style.css')}}">
+</head>
+
+<body>
+
+    <h1>NAPE Center Visualization</h1>
+
+    <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data">
+        <label for="fsignal">Upload Signal CSV:</label><br>
+        <input type="file" id="fsignal" name="fsignal" required><br><br>
+
+        <label for="fevents">Upload Events CSV:</label><br>
+        <input type="file" id="fevents" name="fevents" required><br><br>
+
+        <label for="fs">Sampling Rate:</label><br>
+        <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
+
+        <label for="opto_blank_frame">opto_blank_frame (if PMTs were blanked during stim, set stim times to nan (instead of 0)):</label><br>
+        <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" value="{{ fparams['opto_blank_frame'] }}"><br><br>
+
+        <label for="num_rois">num_rois (set to 'all' if want to show all cells):</label><br>
+        <input type="text" id="num_rois" name="num_rois" value="{{ fparams['num_rois'] }}" required><br><br>
+
+        <label for="selected_conditions">selected_conditions (set to None if want to include all conditions from behav data):</label><br>
+        <input type="text" id="selected_conditions" name="selected_conditions" value="{{ fparams['selected_conditions'] }}" required><br><br>
+
+        <label for="flag_normalization">flag_normalization:</label>
+        <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}" required>
+            <option value="dff_perc">dff_perc</option>
+            <option value="dff">dff</option>
+            <option value="zscore">zscore</option>
+            <option value="None">None</option>
+        </select><br><br>
+
+        <input type="submit" value="Submit" />
+    </form> 
+
+    <!-- The container for the plotly chart -->
+    <div id="chart-container"></div>
+
+    <script type="text/javascript">
+        // Get the graph data from the Flask app
+        var graphJSON = {{ graphJSON | safe }};
+
+        // Render the Plotly chart inside the container
+        Plotly.react('chart-container', graphJSON.data, graphJSON.layout);
+    </script>
+
+    <br /><br />
+</body>
+
+</html>

@@ -228,7 +228,7 @@ def index():
     chart = generateGraph(fparams)
     graphJSON = chart.to_json()
 
-    return render_template('index.html', graphJSON=graphJSON, fparams=fparams)
+    return render_template('tab2.html', graphJSON=graphJSON, fparams=fparams)
 
 if __name__ == '__main__':
     app.run(debug=True)
