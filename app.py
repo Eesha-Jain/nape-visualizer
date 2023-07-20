@@ -1,10 +1,17 @@
 from flask import Flask, render_template, request
 from plots import generateGraphTab2, define_params
-from drive import upload
+from drive import upload, delete_folder
 
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
+def tab1():
+    fparams = define_params()
+    graphJSON = None
+
+    return render_template('tab1.html', graphJSON=graphJSON, fparams=fparams)
+
+@app.route('/tab2', methods=['GET', 'POST'])
 def index():
     if request.method == "POST":
         fs = int(request.form.get('fs'))
@@ -20,7 +27,7 @@ def index():
         fevents_name = fevents.filename
         
         try:
-            file_ids = upload([fsignal, fevents])
+            file_ids, folder_id = upload([fsignal, fevents])
         except Exception as e:
             print(e)
 
@@ -28,6 +35,8 @@ def index():
         
         chart = generateGraphTab2(fparams, file_ids)
         graphJSON = chart.to_json()
+
+        delete_folder(folder_id)
     else:
         fparams = define_params()
         graphJSON = None

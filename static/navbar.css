@@ -1,0 +1,37 @@
+/* Reset default list styles */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Style the navigation bar */
+nav {
+    background-color: var(--primary);
+    margin-top: 30px;
+    margin: 10px 0;
+    height: fit-content;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+}
+
+nav li {
+    margin: 0 10px;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+nav .active {
+    background-color: var(--primary-light);
+}
+
+nav li:hover a {
+    text-decoration: underline;
+}

@@ -56,7 +56,7 @@ def upload(files):
 
         uploaded_files.append(uploaded_file.get("id"))
 
-    return uploaded_files
+    return uploaded_files, folder_id
 
 def create_folder():
     # Get the folder name from the HTML form
@@ -101,3 +101,20 @@ def get_file_by_id(file_id):
         return file_storage
 
     return None
+
+def delete_folder(folder_id):
+    drive_service = create_drive_service()
+
+    try:
+        # Delete all files within the folder
+        query = f"'{folder_id}' in parents and trashed=false"
+        response = drive_service.files().list(q=query).execute()
+        files_in_folder = response.get('files', [])
+        
+        for file in files_in_folder:
+            drive_service.files().delete(fileId=file['id']).execute()
+
+        # Delete the empty folder
+        drive_service.files().delete(fileId=folder_id).execute()
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
