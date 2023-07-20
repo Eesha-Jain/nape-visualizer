@@ -10,7 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 from matplotlib.colors import ListedColormap
 import warnings
-
+from drive import get_file_by_id
+import io
 
 def open_json(json_fpath):
     with open(json_fpath) as json_file:
@@ -47,16 +48,19 @@ def load_h5(fpath):
     return data_snip.transpose(1, 2, 0)
 
 
-def load_signals(fpath):
-    ### load and prepare time-series data
-    glob_signal_files = glob.glob(fpath)
-    _, fext = os.path.splitext(glob_signal_files[0])
-    if len(glob_signal_files) == 0:
-        print('Warning: No or signal files detected; please check your fname and fdir')
+def load_signals(file_id):
+    file_obj = get_file_by_id(file_id)
+
+    file_obj.seek(0)
+    file_content = file_obj.read()
+    csv_string = file_content.decode('utf-8')
+
+    fext = file_obj.content_type
+
     if 'npy' in fext:
-        signals = np.squeeze(np.load(glob_signal_files[0]))
+        signals = np.squeeze(np.load(file_obj))
     elif 'csv' in fext:
-        df_signals = pd.read_csv(glob_signal_files[0], header=None)
+        df_signals = pd.read_csv(io.StringIO(csv_string), header=None)
         if 'Time(s)/Cell Status' in df_signals.values:
             # for inscopix data, drop first two rows and first column, and transpose
             signals = np.transpose(df_signals.drop([0,1], axis=0).iloc[:, 1:].values.astype(np.float32))
@@ -372,14 +376,21 @@ def dict_time_to_samples(dict_in, fs):
     return dict_in
 
 
-def df_to_dict(fpath):
+def df_to_dict(file_id):
     """
     Turns a csv containing events names (column 0) and frame samples (column 1) into a dictionary where keys are event names
     and values are lists containing each event's frame samples
     """
 
+    file_obj = get_file_by_id(file_id)
+
+    file_obj.seek(0)
+    file_content = file_obj.read()
+    csv_string = file_content.decode('utf-8')
+
     event_frames_dict = {}
-    event_frames_df = pd.read_csv(fpath)
+    event_frames_df = pd.read_csv(io.StringIO(csv_string))
+
     for condition in event_frames_df['event'].unique():
         event_frames_dict[condition] = list(event_frames_df[event_frames_df['event'] == condition]['time'])
     return event_frames_dict

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import plotly.graph_objects as go
 import utils
+from drive import get_file_by_id
 
 #important for text to be detected when importing saved figures into illustrator
 matplotlib.rcParams['pdf.fonttype']=42
@@ -49,21 +50,11 @@ def calc_zscore(activity_vec, baseline_samples):
     std_baseline = np.nanstd(data[..., baseline_samples])
     return (data-mean_baseline)/std_baseline
 
-def generateGraph(fparams):
+def generateGraphTab2(fparams, file_ids):
     cond_colors = ['steelblue', 'crimson', 'orchid', 'gold']
 
-    fext = os.path.splitext(fparams['fname_signal'])[-1]
-    signals_fpath = os.path.join(fparams['fdir'], fparams['fname_signal'])
-
-    if fparams['fname_events']:
-        events_file_path = os.path.join(fparams['fdir'], fparams['fname_events'])
-
-    save_dir = os.path.join(fparams['fdir'], 'event_rel_analysis')
-
-    utils.check_exist_dir(save_dir); # make the save directory
-
     # load time-series data
-    signals = utils.load_signals(signals_fpath)
+    signals = utils.load_signals(file_ids[0])
         
     if fparams['opto_blank_frame']:
         try:
@@ -96,16 +87,8 @@ def generateGraph(fparams):
 
     #load behavioral data and trial info
     if fparams['fname_events']:
-
-        glob_event_files = glob.glob(events_file_path) # look for a file in specified directory
-        if not glob_event_files:
-            print(f'{events_file_path} not detected. Please check if path is correct.')
-        if 'csv' in glob_event_files[0]:
-            event_times = utils.df_to_dict(glob_event_files[0])
-        elif 'pkl' in glob_event_files[0]:
-            event_times = pickle.load( open( glob_event_files[0], "rb" ), fix_imports=True, encoding='latin1' ) # latin1 b/c original pickle made in python 2
+        event_times = utils.df_to_dict(file_ids[1])
         event_frames = utils.dict_time_to_samples(event_times, fparams['fs'])
-
 
         event_times = {}
         if fparams['selected_conditions']:

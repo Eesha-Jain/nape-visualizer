@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from plots import generateGraph, define_params
+from plots import generateGraphTab2, define_params
 from drive import upload
 
 app = Flask(__name__)
@@ -21,13 +21,12 @@ def index():
         
         try:
             file_ids = upload([fsignal, fevents])
-            print(file_ids)
         except Exception as e:
             print(e)
 
         fparams = define_params(fs = fs, opto_blank_frame = opto_blank_frame, num_rois = num_rois, selected_conditions = selected_conditions, flag_normalization = flag_normalization, fsignal=fsignal_name, fevents=fevents_name)
         
-        chart = generateGraph(fparams)
+        chart = generateGraphTab2(fparams, file_ids)
         graphJSON = chart.to_json()
     else:
         fparams = define_params()

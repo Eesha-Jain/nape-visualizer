@@ -4,7 +4,9 @@ from flask import Flask, render_template, request
 from google.oauth2 import service_account
 import google.auth.transport.requests as google_auth_transport
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaInMemoryUpload
+from googleapiclient.http import MediaInMemoryUpload, MediaIoBaseDownload
+import io
+from werkzeug.datastructures import FileStorage
 
 # Google OAuth2 credentials
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
@@ -74,3 +76,28 @@ def create_folder():
     folder_id_str = str(folder.get("id"))
 
     return folder_id_str
+
+def get_file_by_id(file_id):
+    drive_service = create_drive_service()
+
+    # Get file metadata
+    file_metadata = drive_service.files().get(fileId=file_id).execute()
+
+    # Check if it's a regular file
+    if file_metadata['mimeType'] != 'application/vnd.google-apps.folder':
+        # Download the file content
+        request = drive_service.files().get_media(fileId=file_id)
+        file_stream = io.BytesIO()
+        downloader = MediaIoBaseDownload(file_stream, request)
+        done = False
+        while done is False:
+            _, done = downloader.next_chunk()
+
+        # Create a FileStorage object with the file content
+        filename = file_metadata['name']
+        mimetype = file_metadata['mimeType']
+        file_storage = FileStorage(stream=file_stream, filename=filename, content_type=mimetype)
+
+        return file_storage
+
+    return None
