@@ -50,8 +50,9 @@
         // Get the graph data from the Flask app
         var graphJSON = {{ graphJSON | safe }};
 
-        // Render the Plotly chart inside the container
-        Plotly.react('chart-container', graphJSON.data, graphJSON.layout);
+        if (graphJSON != NaN) {
+            Plotly.react('chart-container', graphJSON.data, graphJSON.layout);
+        }
     </script>
 
     <br /><br />
