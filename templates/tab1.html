@@ -24,52 +24,60 @@
         </nav>
 
         <div class="container">
-            <form action="{{ url_for('index') }}" method="post" enctype="multipart/form-data" class="box">
-                <label for="fsignal">Upload Signal CSV:</label><br>
-                <input type="file" id="fsignal" name="fsignal" required><br><br>
+            <form action="{{ url_for('tab1') }}" method="post" enctype="multipart/form-data" class="box">
+                <label for="ff">Upload F.npy:</label><br>
+                <input type="file" id="ff" name="ff" required><br><br>
 
-                <label for="fevents">Upload Events CSV:</label><br>
-                <input type="file" id="fevents" name="fevents" required><br><br>
+                <label for="ffneu">Upload Fneu.npy</label><br>
+                <input type="file" id="ffneu" name="ffneu" required><br><br>
 
-                <label for="fs">Sampling Rate:</label><br>
-                <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
+                <label for="fiscell">Upload iscell.npy</label><br>
+                <input type="file" id="fiscell" name="fiscell" required><br><br>
 
-                <label for="opto_blank_frame">Opto Blank Frame:</label>
-                <p class="description">If PMTs were blanked during stim, set stim times to NaN (instead of 0)</p>
-                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" value="{{ fparams['opto_blank_frame'] }}"><br><br>
+                <label for="fops">Upload ops.npy</label><br>
+                <input type="file" id="fops" name="fops" required><br><br>
 
-                <label for="num_rois">Number of Rois:</label>
-                <p class="description">Set to "all" if want to show all cells</p>
-                <input type="text" id="num_rois" name="num_rois" value="{{ fparams['num_rois'] }}" required><br><br>
+                <label for="fspks">Upload spks.npy</label><br>
+                <input type="file" id="fspks" name="fspks" required><br><br>
 
-                <label for="selected_conditions">Selected Conditions:</label>
-                <p class="description">Set to "None" if want to include all conditions from behavior data</p>
-                <input type="text" id="selected_conditions" name="selected_conditions" value="{{ fparams['selected_conditions'] }}" required><br><br>
-
-                <label for="flag_normalization">Flag Normalization:</label>
-                <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}" required>
-                    <option value="dff_perc">dff_perc</option>
-                    <option value="dff">dff</option>
-                    <option value="zscore">zscore</option>
-                    <option value="None">None</option>
-                </select><br><br>
+                <label for="fstat">Upload stat.npy</label><br>
+                <input type="file" id="fstat" name="fstat" required><br><br>
 
                 <div class="flex"><input type="submit" value="Submit" /></div>
             </form> 
             <br /><br />
-            <!-- The container for the plotly chart -->
             <div class="box" style="padding: 0;">
-                <div id="chart-container"></div>
+                <div id="chart1-container"></div>
+            </div>
+            <br /><br />
+            <div class="box" style="padding: 0;">
+                <div id="chart2-container"></div>
+            </div>
+            <br /><br />
+            <div class="box" style="padding: 0;">
+                <div id="chart3-container"></div>
             </div>
         </div>
         <br />
 
         <script type="text/javascript">
             // Get the graph data from the Flask app
-            var graphJSON = {{ graphJSON | safe }};
+            var graph1JSON = {{ graph1JSON | safe }};
 
-            if (graphJSON != NaN) {
-                Plotly.react('chart-container', graphJSON.data, graphJSON.layout, {displayModeBar: true});
+            if (graph1JSON != NaN) {
+                Plotly.react('chart1-container', graph1JSON.data, graph1JSON.layout, {displayModeBar: true});
+            }
+
+            var graph2JSON = {{ graph2JSON | safe }};
+
+            if (graph2JSON != NaN) {
+                Plotly.react('chart2-container', graph2JSON.data, graph2JSON.layout, {displayModeBar: true});
+            }
+
+            var graph3JSON = {{ graph3JSON | safe }};
+
+            if (graph3JSON != NaN) {
+                Plotly.react('chart3-container', graph3JSON.data, graph3JSON.layout, {displayModeBar: true});
             }
         </script>
     </body>

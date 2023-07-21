@@ -50,7 +50,7 @@ def calc_zscore(activity_vec, baseline_samples):
     std_baseline = np.nanstd(data[..., baseline_samples])
     return (data-mean_baseline)/std_baseline
 
-def generateGraphTab2(fparams, file_ids):
+def generate_graph_tab2(fparams, file_ids):
     cond_colors = ['steelblue', 'crimson', 'orchid', 'gold']
 
     # load time-series data
@@ -176,3 +176,119 @@ def generateGraphTab2(fparams, file_ids):
     fig.update_yaxes(showline=True, linewidth=1.5, linecolor='black')
 
     return fig
+
+def generate_s2p_data_dict(file_ids):
+    s2p_data_dict = {
+        "ops": get_file_by_id(file_ids["ops"])
+    }
+    
+    return s2p_data_dict
+
+def prep_plotting_rois(s2p_data_dict): 
+    max_rois_tseries = 10
+    plot_vars = {}
+    plot_vars['cell_ids'] = np.where( s2p_data_dict['iscell'][:,0] == 1 )[0] # indices of user-curated cells referencing all ROIs detected by s2p
+    plot_vars['num_total_rois'] = len(plot_vars['cell_ids'])
+    
+    # determine if only a subset of cells tseries are to be plotted
+    if isinstance(path_dict['rois_to_plot'], list): # if user supplied ROIs
+        plot_vars['rois_to_tseries'] = path_dict['rois_to_plot']
+        plot_vars['num_rois_to_tseries'] = len(plot_vars['rois_to_tseries'])
+    elif plot_vars['num_total_rois'] > max_rois_tseries: # if too many cells to visualize tseries, randomly sample from cells
+        plot_vars['rois_to_tseries'] = sorted(random.sample(plot_vars['cell_ids'].tolist(), max_rois_tseries))
+        plot_vars['num_rois_to_tseries'] = len(plot_vars['rois_to_tseries'])
+    else:
+        plot_vars['rois_to_tseries'] = plot_vars['cell_ids']
+        plot_vars['num_rois_to_tseries'] = plot_vars['num_total_rois'] 
+        
+    return plot_vars
+
+def contour_plot_tab1(s2p_data_dict, path_dict, plot_vars, show_labels_=True, cmap_scale_ratio=1):
+    if 'threshold_scaling_value' in path_dict:
+        tsv = path_dict['threshold_scaling_value']
+    
+    to_plot = s2p_data_dict['ops']['meanImg']
+
+    fig, ax = plt.subplots(1, 1, figsize = (10,10))
+    ax.imshow(to_plot, cmap = 'gray', vmin=np.min(to_plot)*(1.0/cmap_scale_ratio), vmax=np.max(to_plot)*(1.0/cmap_scale_ratio))
+    ax.axis('off')
+    
+    idx_color_rois = 0
+    for idx, roi_id in enumerate(plot_vars['cell_ids']): 
+        if roi_id in plot_vars['rois_to_tseries']:
+            this_roi_color = plot_vars['colors_roi'][idx_color_rois]
+            idx_color_rois += 1
+        else:
+            this_roi_color = 'grey'
+        ax.contour(plot_vars['s2p_masks'][idx,:,:], colors=[this_roi_color])
+        if show_labels_ and roi_id in plot_vars['rois_to_tseries']:
+            ax.text(plot_vars['roi_centroids'][idx][1]-1, plot_vars['roi_centroids'][idx][0]-1,  str(roi_id), fontsize=18, weight='bold', color = this_roi_color)
+
+    return plt
+
+# initialize variables for plotting time-series
+def time_series_plot_tab1(file_ids, plot_vars):
+    
+    if 'threshold_scaling_value' in path_dict:
+        tsv = path_dict['threshold_scaling_value']
+
+    fs = s2p_data_dict['ops']['fs']
+    num_samps = s2p_data_dict['ops']['nframes']
+    total_time = num_samps/fs 
+    tvec = np.linspace(0,total_time,num_samps)
+        
+    # F_npil_corr_dff contains all s2p-detected cells
+    trace_data_selected = s2p_data_dict['F_npil_corr_dff'][plot_vars['rois_to_tseries']]
+    
+    # cut data and tvec to start/end if user defined
+    if path_dict['tseries_start_end']:
+        sample_start = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][0])
+        sample_end = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][1])
+        tvec = tvec[sample_start:sample_end]
+        trace_data_selected = trace_data_selected[:,sample_start:sample_end]
+    
+    fig, ax = plt.subplots(plot_vars['num_rois_to_tseries'], 1, figsize = (9,2*plot_vars['num_rois_to_tseries']))
+    for idx in range(plot_vars['num_rois_to_tseries']):
+        
+        to_plot = trace_data_selected[idx] 
+        
+        ax[idx].plot(tvec, np.transpose( to_plot ), color = plot_vars['colors_roi'][idx] )
+        
+        ax[idx].set_title(f"ROI {plot_vars['rois_to_tseries'][idx]}")
+        ax[idx].tick_params(axis='both', which='major', labelsize=13)
+        ax[idx].tick_params(axis='both', which='minor', labelsize=13)
+        if idx == np.ceil(plot_vars['num_rois_to_tseries']/2-1):
+            ax[idx].set_ylabel('Fluorescence Level',fontsize = 20)
+            
+
+    plt.setp(ax, xlim=None, ylim=[np.min(trace_data_selected)*1.1, np.max(trace_data_selected)*1.1])  
+
+    ax[idx].set_xlabel('Time (s)',fontsize = 20)
+
+    return plt
+
+def heatmap_plot_tab1(file_ids, plot_vars):
+    # under development
+    plt.figure(figsize = (10, 10))
+    
+    if 'threshold_scaling_value' in path_dict:
+        tsv = path_dict['threshold_scaling_value']
+
+    fs = s2p_data_dict['ops']['fs']
+    num_samps = s2p_data_dict['ops']['nframes']
+    total_time = num_samps/fs 
+    tvec = np.linspace(0,total_time,num_samps)
+        
+    # F_npil_corr_dff contains all s2p-detected cells; cell_ids references those indices
+    trace_data_selected = s2p_data_dict['F_npil_corr_dff'][plot_vars['cell_ids']]
+
+    extent_ = [tvec[0], tvec[-1], plot_vars['num_rois'], 0 ]
+    
+    # cut data and tvec to start/end if user defined
+    if path_dict['tseries_start_end']:
+        sample_start = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][0])
+        sample_end = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][1])
+        tvec = tvec[sample_start:sample_end]
+        trace_data_selected = trace_data_selected[:,sample_start:sample_end]
+        
+    return plt
