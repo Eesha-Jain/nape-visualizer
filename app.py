@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from plots import generate_graph_tab2, define_params, contour_plot_tab1, time_series_plot_tab1, heatmap_plot_tab1, prep_plotting_rois, generate_s2p_data_dict
+from plots import generate_graph_tab2, define_params, contour_plot_tab1, time_series_plot_tab1, heatmap_plot_tab1, prep_plotting_rois, define_paths_roi_plots, load_s2p_data_roi_plots, masks_init
 from drive import upload, delete_folder
 
 app = Flask(__name__)
@@ -26,20 +26,37 @@ def tab1():
             }
         except Exception as e:
             print(e)
-
-        s2p_data_dict = generate_s2p_data_dict(file_ids_dict)
-        plots_vars = prep_plotting_rois(s2p_data_dict)
         
-        chart_contour = contour_plot_tab1(s2p_data_dict, plots_vars)
+        #USER DEFINDED VARIABLES
+        tseries_start_end = [0, 10] # setting None will plot the whole session
+        show_labels = True
+        """
+        define number of ROIs to visualize
+
+        can be: 
+        1) a list of select rois, 
+        2) an integer (n) indicating n first rois to plot, or 
+        3) None which plots all valid ROIs
+        """ 
+        rois_to_plot = None
+
+        #ACTUAL CODE
+        path_dict = {}
+        path_dict = define_paths_roi_plots(file_ids_dict, path_dict, tseries_start_end, rois_to_plot)
+        s2p_data_dict = load_s2p_data_roi_plots(path_dict)
+        plot_vars = prep_plotting_rois(s2p_data_dict, path_dict)
+        masks_init(plot_vars, s2p_data_dict)
+        
+        chart_contour = contour_plot_tab1(s2p_data_dict, path_dict, plot_vars, show_labels_=show_labels, cmap_scale_ratio=3)
         graph1JSON = chart_contour.to_json()
 
-        chart_time = time_series_plot_tab1(s2p_data_dict, plots_vars)
+        chart_time = time_series_plot_tab1(s2p_data_dict, path_dict, plot_vars)
         graph2JSON = chart_time.to_json()
 
-        chart_heat = heatmap_plot_tab1(s2p_data_dict, plots_vars)
+        chart_heat = heatmap_plot_tab1(s2p_data_dict, path_dict, plot_vars)
         graph3JSON = chart_heat.to_json()
 
-        #delete_folder(folder_id)
+        delete_folder(folder_id)
     else:
         graph1JSON = None
         graph2JSON = None

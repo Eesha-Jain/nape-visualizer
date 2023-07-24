@@ -75,11 +75,19 @@ input[type=submit] {
 
 input[type=submit]:hover {
     background-color: var(--primary-light);
+    cursor: pointer;
 }
 
-.chart-container .plot-container div {
+.chart-container .plot-container div,
+.chart1-container .plot-container div,
+.chart2-container .plot-container div,
+.chart3-container .plot-container div {
     width: inherit !important;
     height: auto !important;
+}
+
+.chart2-container .plot-container div {
+    height: 800px !important;
 }
 
 label {

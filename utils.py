@@ -3,7 +3,6 @@ import json
 import pickle
 import h5py
 import numpy as np
-import glob
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
@@ -47,6 +46,21 @@ def load_h5(fpath):
      reorganize the data dimension order"""
     return data_snip.transpose(1, 2, 0)
 
+def read_csv_contents(file_id):
+    file_obj = get_file_by_id(file_id)
+    file_obj.seek(0)
+    file_content = file_obj.read()
+    
+    csv_string = file_content.decode('utf-8')
+    data = pd.read_csv(io.StringIO(csv_string), header=None)
+
+    return data
+
+def get_contents(file_id):
+    file_obj = get_file_by_id(file_id)
+    file_obj.seek(0)
+    file_content = file_obj.read()
+    return io.BytesIO(file_content)
 
 def load_signals(file_id):
     file_obj = get_file_by_id(file_id)

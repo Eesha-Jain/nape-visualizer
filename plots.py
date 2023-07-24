@@ -3,15 +3,9 @@ import numpy as np
 import glob
 import pickle
 import matplotlib.pyplot as plt
-import matplotlib
 import plotly.graph_objects as go
 import utils
-from drive import get_file_by_id
-
-#important for text to be detected when importing saved figures into illustrator
-matplotlib.rcParams['pdf.fonttype']=42
-matplotlib.rcParams['ps.fonttype']=42
-plt.rcParams["font.family"] = "Arial"
+import random
 
 # method options are 'single', 'f2a', 'root_dir'
 def define_params(fs = 5, opto_blank_frame = False, num_rois = 10, selected_conditions = None, flag_normalization = "dff_perc", fsignal = "VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv", fevents="event_times_VJ_OFCVTA_7_260_D6_trained.csv"):
@@ -156,12 +150,11 @@ def generate_graph_tab2(fparams, file_ids):
         xaxis_title="Time (s)",
         yaxis_title="Fluorescence ({})".format(fparams['flag_normalization']),
         legend_title="Legend Title",
-        font=dict(
-            size=12),
         sliders=sliders,
         showlegend=True,
         legend_title_text='Legend',
-        plot_bgcolor='rgba(0,0,0,0)'
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=40)
     )
 
     # rename slider ticks
@@ -177,14 +170,41 @@ def generate_graph_tab2(fparams, file_ids):
 
     return fig
 
-def generate_s2p_data_dict(file_ids):
-    s2p_data_dict = {
-        "ops": get_file_by_id(file_ids["ops"])
-    }
+def define_paths_roi_plots(file_ids, path_dict, tseries_start_end, rois_to_plot):
+
+    path_dict['tseries_start_end'] = tseries_start_end
+    path_dict['rois_to_plot'] = rois_to_plot
+    path_dict['s2p_F_path'] = utils.get_contents(file_ids["f"])
+    path_dict['s2p_Fneu_path'] = utils.get_contents(file_ids["fneu"])
+    path_dict['s2p_iscell_path'] = utils.get_contents(file_ids["iscell"])
+    path_dict['s2p_ops_path'] = utils.get_contents(file_ids["ops"])
+    path_dict['s2p_stat_path'] = utils.get_contents(file_ids["stat"])
+    path_dict['s2p_spks_path'] = utils.get_contents(file_ids["spks"])
     
+    return path_dict
+
+# Takes the path information from path_dict and uses it to load and save the files
+# they direct towards
+
+
+def load_s2p_data_roi_plots(path_dict):
+    
+    s2p_data_dict = {}
+    # load s2p data
+    s2p_data_dict['F'] = np.load(path_dict['s2p_F_path'], allow_pickle=True)
+    s2p_data_dict['Fneu'] = np.load(path_dict['s2p_Fneu_path'], allow_pickle=True)
+    s2p_data_dict['iscell'] = np.load(path_dict['s2p_iscell_path'], allow_pickle=True)
+    s2p_data_dict['ops'] = np.load(path_dict['s2p_ops_path'], allow_pickle=True).item()
+    s2p_data_dict['stat'] = np.load(path_dict['s2p_stat_path'], allow_pickle=True)
+
+    s2p_data_dict['F_npil_corr'] = s2p_data_dict['F'] - s2p_data_dict['ops']['neucoeff'] * s2p_data_dict['Fneu']
+
+    s2p_data_dict['F_npil_corr_dff'] = np.apply_along_axis(utils.calc_dff, 1, s2p_data_dict['F_npil_corr'])
+
     return s2p_data_dict
 
-def prep_plotting_rois(s2p_data_dict): 
+#initializes variables for roi plots
+def prep_plotting_rois(s2p_data_dict, path_dict): 
     max_rois_tseries = 10
     plot_vars = {}
     plot_vars['cell_ids'] = np.where( s2p_data_dict['iscell'][:,0] == 1 )[0] # indices of user-curated cells referencing all ROIs detected by s2p
@@ -203,92 +223,155 @@ def prep_plotting_rois(s2p_data_dict):
         
     return plot_vars
 
+# initialize templates for contour map
+def masks_init(plot_vars, s2p_data_dict):
+    num_rois_to_tseries = plot_vars['num_rois_to_tseries']
+
+    plot_vars['colors_roi'] = [f'rgb{tuple(np.round(np.array(c[:3]) * 254).astype(int))}' for c in plt.cm.viridis(np.linspace(0, 1, num_rois_to_tseries))]
+    plot_vars['s2p_masks'] = np.empty([plot_vars['num_total_rois'], s2p_data_dict['ops']['Ly'], s2p_data_dict['ops']['Lx']])
+    plot_vars['roi_centroids'] = np.empty([plot_vars['num_total_rois'], 2])
+
+    # loop through ROIs and add their spatial footprints to template
+    for idx, roi_id in enumerate(plot_vars['cell_ids']):
+
+        zero_template = np.zeros([s2p_data_dict['ops']['Ly'], s2p_data_dict['ops']['Lx']])
+        zero_template[ s2p_data_dict['stat'][roi_id]['ypix'], s2p_data_dict['stat'][roi_id]['xpix'] ] = 1
+        plot_vars['s2p_masks'][idx,...] = zero_template
+
+        plot_vars['roi_centroids'][idx,...] = [np.min(s2p_data_dict['stat'][roi_id]['ypix']), np.min(s2p_data_dict['stat'][roi_id]['xpix'])]
+
+        if idx == plot_vars['num_total_rois'] - 1:
+            break
+
+    return plot_vars
+
+# plot contours and cell numbers on projection image
 def contour_plot_tab1(s2p_data_dict, path_dict, plot_vars, show_labels_=True, cmap_scale_ratio=1):
     if 'threshold_scaling_value' in path_dict:
         tsv = path_dict['threshold_scaling_value']
-    
+
     to_plot = s2p_data_dict['ops']['meanImg']
 
-    fig, ax = plt.subplots(1, 1, figsize = (10,10))
-    ax.imshow(to_plot, cmap = 'gray', vmin=np.min(to_plot)*(1.0/cmap_scale_ratio), vmax=np.max(to_plot)*(1.0/cmap_scale_ratio))
-    ax.axis('off')
-    
-    idx_color_rois = 0
-    for idx, roi_id in enumerate(plot_vars['cell_ids']): 
+    fig = go.Figure()
+
+    # Add the image as a heatmap trace
+    heatmap_trace = go.Heatmap(z=to_plot,
+                               colorscale='gray',
+                               zmin=np.min(to_plot) * (1.0 / cmap_scale_ratio),
+                               zmax=np.max(to_plot) * (1.0 / cmap_scale_ratio),
+                               showscale=False)  # Set showscale to False to hide the colorbar
+    fig.add_trace(heatmap_trace)
+
+    # Create a scatter trace for each contour
+    for idx, roi_id in enumerate(plot_vars['cell_ids']):
         if roi_id in plot_vars['rois_to_tseries']:
-            this_roi_color = plot_vars['colors_roi'][idx_color_rois]
-            idx_color_rois += 1
+            this_roi_color = plot_vars['colors_roi'][idx]
         else:
             this_roi_color = 'grey'
-        ax.contour(plot_vars['s2p_masks'][idx,:,:], colors=[this_roi_color])
-        if show_labels_ and roi_id in plot_vars['rois_to_tseries']:
-            ax.text(plot_vars['roi_centroids'][idx][1]-1, plot_vars['roi_centroids'][idx][0]-1,  str(roi_id), fontsize=18, weight='bold', color = this_roi_color)
 
-    return plt
+        # Find the contour points for this ROI
+        contours = np.where(plot_vars['s2p_masks'][idx] > 0)
+
+        # Create scatter trace with mode 'lines' to draw contour lines
+        contour_trace = go.Scatter(x=contours[1],
+                                   y=contours[0],
+                                   mode='lines',
+                                   line=dict(color=this_roi_color))
+        fig.add_trace(contour_trace)
+
+        # Add the ROI label
+        if show_labels_ and roi_id in plot_vars['rois_to_tseries']:
+            fig.add_annotation(text=str(roi_id),
+                               x=plot_vars['roi_centroids'][idx][1] - 1,
+                               y=plot_vars['roi_centroids'][idx][0] - 1,
+                               font=dict(family="Arial", size=18, color=this_roi_color),
+                               showarrow=False)
+
+    # Remove axis ticks and labels
+    fig.update_xaxes(showticklabels=False)
+    fig.update_yaxes(showticklabels=False)
+
+    # Adjust margins and size
+    fig.update_layout(margin=dict(l=10, b=10, t=30), font=dict(family="Arial", size=18))
+
+    return fig
 
 # initialize variables for plotting time-series
-def time_series_plot_tab1(file_ids, plot_vars):
-    
+def time_series_plot_tab1(s2p_data_dict, path_dict, plot_vars):
     if 'threshold_scaling_value' in path_dict:
         tsv = path_dict['threshold_scaling_value']
 
     fs = s2p_data_dict['ops']['fs']
     num_samps = s2p_data_dict['ops']['nframes']
-    total_time = num_samps/fs 
-    tvec = np.linspace(0,total_time,num_samps)
-        
+    total_time = num_samps / fs
+    tvec = np.linspace(0, total_time, num_samps)
+
     # F_npil_corr_dff contains all s2p-detected cells
     trace_data_selected = s2p_data_dict['F_npil_corr_dff'][plot_vars['rois_to_tseries']]
-    
-    # cut data and tvec to start/end if user defined
+
+    # Cut data and tvec to start/end if user defined
     if path_dict['tseries_start_end']:
         sample_start = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][0])
         sample_end = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][1])
         tvec = tvec[sample_start:sample_end]
-        trace_data_selected = trace_data_selected[:,sample_start:sample_end]
-    
-    fig, ax = plt.subplots(plot_vars['num_rois_to_tseries'], 1, figsize = (9,2*plot_vars['num_rois_to_tseries']))
+        trace_data_selected = trace_data_selected[:, sample_start:sample_end]
+
+    # Create a list of traces for each ROI
+    traces = []
     for idx in range(plot_vars['num_rois_to_tseries']):
-        
-        to_plot = trace_data_selected[idx] 
-        
-        ax[idx].plot(tvec, np.transpose( to_plot ), color = plot_vars['colors_roi'][idx] )
-        
-        ax[idx].set_title(f"ROI {plot_vars['rois_to_tseries'][idx]}")
-        ax[idx].tick_params(axis='both', which='major', labelsize=13)
-        ax[idx].tick_params(axis='both', which='minor', labelsize=13)
-        if idx == np.ceil(plot_vars['num_rois_to_tseries']/2-1):
-            ax[idx].set_ylabel('Fluorescence Level',fontsize = 20)
-            
+        to_plot = trace_data_selected[idx]
+        roi_trace = go.Scatter(x=tvec, y=to_plot, mode='lines', line=dict(color=plot_vars['colors_roi'][idx]))
+        traces.append(roi_trace)
 
-    plt.setp(ax, xlim=None, ylim=[np.min(trace_data_selected)*1.1, np.max(trace_data_selected)*1.1])  
+    # Create the figure
+    fig = go.Figure(data=traces)
+    # Update layout
+    fig.update_layout(
+        margin=dict(t=40),
+        xaxis_title="Time (s)",
+        yaxis_title="Fluorescence Level",
+        showlegend=False,
+        font=dict(family="Arial", size=15),
+        height=54  # Set the height to 54 pixels
+    )
 
-    ax[idx].set_xlabel('Time (s)',fontsize = 20)
+    # Add titles to each subplot
+    for idx in range(plot_vars['num_rois_to_tseries']):
+        fig.update_layout(title=f"ROI {plot_vars['rois_to_tseries'][idx]}", yaxis=dict(domain=[idx * 0.2, (idx + 1) * 0.2]))
 
-    return plt
+    return fig
 
-def heatmap_plot_tab1(file_ids, plot_vars):
-    # under development
-    plt.figure(figsize = (10, 10))
-    
+def heatmap_plot_tab1(s2p_data_dict, path_dict, plot_vars):
     if 'threshold_scaling_value' in path_dict:
         tsv = path_dict['threshold_scaling_value']
 
     fs = s2p_data_dict['ops']['fs']
     num_samps = s2p_data_dict['ops']['nframes']
-    total_time = num_samps/fs 
-    tvec = np.linspace(0,total_time,num_samps)
-        
+    total_time = num_samps / fs
+    tvec = np.linspace(0, total_time, num_samps)
+
     # F_npil_corr_dff contains all s2p-detected cells; cell_ids references those indices
     trace_data_selected = s2p_data_dict['F_npil_corr_dff'][plot_vars['cell_ids']]
 
-    extent_ = [tvec[0], tvec[-1], plot_vars['num_rois'], 0 ]
-    
-    # cut data and tvec to start/end if user defined
+    # Cut data and tvec to start/end if user defined
     if path_dict['tseries_start_end']:
         sample_start = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][0])
         sample_end = utils.get_tvec_sample(tvec, path_dict['tseries_start_end'][1])
         tvec = tvec[sample_start:sample_end]
-        trace_data_selected = trace_data_selected[:,sample_start:sample_end]
-        
-    return plt
+        trace_data_selected = trace_data_selected[:, sample_start:sample_end]
+
+    # Create a heatmap trace
+    trace = go.Heatmap(z=trace_data_selected, x=tvec, y=plot_vars['cell_ids'])
+
+    # Create the figure
+    fig = go.Figure(data=trace)
+
+    # Update layout
+    fig.update_layout(
+        margin=dict(l=60, b=50, t=40),
+        xaxis_title="Time (s)",
+        yaxis_title="ROI",
+        font=dict(family="Arial", size=15)
+    )
+
+    return fig
