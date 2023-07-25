@@ -35,23 +35,32 @@
 
     <div class="container">
         <form action="{{ url_for('photon2_tab1') }}" method="post" enctype="multipart/form-data" class="box">
-            <label for="ff">Upload F.npy:</label><br>
-            <input type="file" id="ff" name="ff" required><br><br>
+            <div class="row">
+                <div>
+                    <label for="ff">Upload F.npy:</label><br>
+                    <input type="file" id="ff" name="ff"><br><br>
 
-            <label for="ffneu">Upload Fneu.npy</label><br>
-            <input type="file" id="ffneu" name="ffneu" required><br><br>
+                    <label for="ffneu">Upload Fneu.npy</label><br>
+                    <input type="file" id="ffneu" name="ffneu"><br><br>
 
-            <label for="fiscell">Upload iscell.npy</label><br>
-            <input type="file" id="fiscell" name="fiscell" required><br><br>
+                    <label for="fiscell">Upload iscell.npy</label><br>
+                    <input type="file" id="fiscell" name="fiscell"><br><br>
 
-            <label for="fops">Upload ops.npy</label><br>
-            <input type="file" id="fops" name="fops" required><br><br>
+                    <label for="fops">Upload ops.npy</label><br>
+                    <input type="file" id="fops" name="fops"><br><br>
 
-            <label for="fspks">Upload spks.npy</label><br>
-            <input type="file" id="fspks" name="fspks" required><br><br>
+                    <label for="fspks">Upload spks.npy</label><br>
+                    <input type="file" id="fspks" name="fspks"><br><br>
 
-            <label for="fstat">Upload stat.npy</label><br>
-            <input type="file" id="fstat" name="fstat" required><br><br>
+                    <label for="fstat">Upload stat.npy</label><br>
+                    <input type="file" id="fstat" name="fstat"><br><br>
+                </div>
+                <div>
+                    <label for="ffolder">OR Upload a folder containing all these files:</label>
+                    <p class="description">Files must be named exactly as the left</p>
+                    <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory="" mozdirectory=""><br><br>
+                </div>
+            </div>
 
             <div class="flex"><input type="submit" value="Submit" /></div>
         </form>

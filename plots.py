@@ -278,7 +278,8 @@ def contour_plot_tab1(s2p_data_dict, path_dict, plot_vars, show_labels_=True, cm
         contour_trace = go.Scatter(x=contours[1],
                                    y=contours[0],
                                    mode='lines',
-                                   line=dict(color=this_roi_color))
+                                   line=dict(color=this_roi_color),
+                                   name=f"ROI {roi_id}")
         fig.add_trace(contour_trace)
 
         # Add the ROI label
@@ -294,7 +295,7 @@ def contour_plot_tab1(s2p_data_dict, path_dict, plot_vars, show_labels_=True, cm
     fig.update_yaxes(showticklabels=False)
 
     # Adjust margins and size
-    fig.update_layout(margin=dict(l=10, b=10, t=30), font=dict(family="Arial", size=18))
+    fig.update_layout(margin=dict(l=10, b=10, t=30), font=dict(family="Arial", size=15))
 
     return fig
 
@@ -325,12 +326,17 @@ def time_series_plot_tab1(s2p_data_dict, path_dict, plot_vars):
     # Melt the DataFrame to have a 'variable' column for ROI names and 'value' column for trace values
     df_trace_data_melted = pd.melt(df_trace_data, id_vars=['Time (s)'], value_vars=[f"ROI {roi}" for roi in plot_vars['rois_to_tseries']])
 
+    colors_dict = {}
+
+    for roi, i in enumerate(plot_vars['rois_to_tseries']):
+        colors_dict[f"ROI {roi}"] = plot_vars['colors_roi'][i]
+
     # Create the figure using plotly.express
-    fig = px.line(df_trace_data_melted, x='Time (s)', y='value', color='variable')
+    fig = px.line(df_trace_data_melted, x='Time (s)', y='value', color='variable', color_discrete_map=colors_dict)
 
     # Update layout
     fig.update_layout(
-        margin=dict(t=40),
+        margin=dict(l=20, b=10, t=30),
         xaxis_title="Time (s)",
         yaxis_title="Fluorescence Level",
         showlegend=True,

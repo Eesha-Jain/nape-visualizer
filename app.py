@@ -12,12 +12,31 @@ def photon():
 @app.route('/2photon/tab1', methods=['GET', 'POST'])
 def photon2_tab1():
     if request.method == "POST":
-        ff = request.files["ff"]
-        ffneu = request.files["ffneu"]
-        fiscell = request.files["fiscell"]
-        fops = request.files["fops"]
-        fspks = request.files["fspks"]
-        fstat = request.files["fstat"]
+        try:
+            ff = request.files["ff"]
+            ffneu = request.files["ffneu"]
+            fiscell = request.files["fiscell"]
+            fops = request.files["fops"]
+            fspks = request.files["fspks"]
+            fstat = request.files["fstat"]
+
+            if (not ff) or (not ffneu) or (not fiscell) or (not fops) or (not fspks) or (not fstat):
+                raise Exception()
+        except Exception as e:
+            files = request.files.getlist('ffolder')
+            files_dict = {}
+
+            for file in files:
+                if file:
+                    filename = file.filename.lower().split("/")
+                    files_dict[filename[len(filename) - 1]] = file
+
+            ff = files_dict["f.npy"]
+            ffneu = files_dict["fneu.npy"]
+            fiscell = files_dict["iscell.npy"]
+            fops = files_dict["ops.npy"]
+            fspks = files_dict["spks.npy"]
+            fstat = files_dict["stat.npy"]
         
         try:
             file_ids, folder_id = upload([ff, ffneu, fiscell, fops, fspks, fstat])

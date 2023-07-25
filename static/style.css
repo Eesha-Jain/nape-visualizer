@@ -27,6 +27,12 @@ h1 {
     margin-bottom: 5px;
 }
 
+.row {
+    display: grid;
+    grid-template-columns: 50% auto;
+    column-gap: 20px;
+}
+
 .container {
     padding: 20px;
     width: 90vw;
