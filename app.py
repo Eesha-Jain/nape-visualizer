@@ -12,6 +12,7 @@ def photon():
 @app.route('/2photon/tab1', methods=['GET', 'POST'])
 def photon2_tab1():
     if request.method == "POST":
+        #Assigning files from input to variables based on whether they were uploaded individually or if a folder was uploaded
         try:
             ff = request.files["ff"]
             ffneu = request.files["ffneu"]
@@ -51,20 +52,30 @@ def photon2_tab1():
         except Exception as e:
             print(e)
         
-        #USER DEFINDED VARIABLES
-        tseries_start_end = [0, 10] # setting None will plot the whole session
-        show_labels = True
-        """
-        define number of ROIs to visualize
+        #Assign user inputs to fparams
+        fparams = {
+            "tseries_start_end": request.form.get('tseries_start_end'),
+            "show_labels": request.form.get('show_labels'),
+            "rois_to_plot": request.form.get('rois_to_plot')
+        }
 
-        can be: 
-        1) a list of select rois, 
-        2) an integer (n) indicating n first rois to plot, or 
-        3) None which plots all valid ROIs
-        """ 
-        rois_to_plot = None
+        if request.form.get('rois_to_plot') == "None":
+            rois_to_plot = None
+        elif len(request.form.get('rois_to_plot').split(",")) > 1:
+            rois_to_plot_split = request.form.get('rois_to_plot').split(",")
+            rois_to_plot = [int(item) for item in rois_to_plot_split]
+        else:
+            rois_to_plot = int(request.form.get('rois_to_plot'))
 
-        #ACTUAL CODE
+        if request.form.get('tseries_start_end') == "None":
+            tseries_start_end = None
+        else:
+            tseries_start_end_split = request.form.get('tseries_start_end').split(",")
+            tseries_start_end = [int(item) for item in tseries_start_end_split]
+
+        show_labels = False if request.form.get('show_labels') == "false" else True
+
+        #Generate plots and their respective JSON
         path_dict = {}
         path_dict = define_paths_roi_plots(file_ids_dict, path_dict, tseries_start_end, rois_to_plot)
         s2p_data_dict = load_s2p_data_roi_plots(path_dict)
@@ -80,13 +91,19 @@ def photon2_tab1():
         chart_heat = heatmap_plot_tab1(s2p_data_dict, path_dict, plot_vars)
         graph3JSON = chart_heat.to_json()
 
+        #Delete the google drive folder
         delete_folder(folder_id)
     else:
         graph1JSON = None
         graph2JSON = None
         graph3JSON = None
+        fparams = {
+            "tseries_start_end": "0, 10",
+            "show_labels": "true",
+            "rois_to_plot": None
+        }
 
-    return render_template('2photon/tab1.html', graph1JSON=graph1JSON, graph2JSON=graph2JSON, graph3JSON=graph3JSON)
+    return render_template('2photon/tab1.html', graph1JSON=graph1JSON, graph2JSON=graph2JSON, graph3JSON=graph3JSON, fparams=fparams)
 
 @app.route('/2photon/tab2', methods=['GET', 'POST'])
 def photon2_tab2():
@@ -97,8 +114,24 @@ def photon2_tab2():
         selected_conditions = None if request.form.get('selected_conditions') == "None" else request.form.get('selected_conditions')
         flag_normalization = request.form.get('flag_normalization')
 
-        fsignal = request.files["fsignal"]
-        fevents = request.files["fevents"]
+        #Assigning files from input to variables based on whether they were uploaded individually or if a folder was uploaded
+        try:
+            fsignal = request.files["fsignal"]
+            fevents = request.files["fevents"]
+
+            if (not fsignal) or (not fevents):
+                raise Exception()
+        except Exception as e:
+            files = request.files.getlist('ffolder')
+            files_dict = {}
+
+            for file in files:
+                if file:
+                    filename = file.filename.lower().split("/")
+                    files_dict[filename[len(filename) - 1]] = file
+
+            fsignal = files_dict["signals.csv"]
+            fevents = files_dict["events.csv"]
 
         fsignal_name = fsignal.filename
         fevents_name = fevents.filename
@@ -108,6 +141,7 @@ def photon2_tab2():
         except Exception as e:
             print(e)
 
+        # Generate plots and their JSON files
         fparams = define_params(fs = fs, opto_blank_frame = opto_blank_frame, num_rois = num_rois, selected_conditions = selected_conditions, flag_normalization = flag_normalization, fsignal=fsignal_name, fevents=fevents_name)
         
         chart = generate_graph_tab2(fparams, file_ids)

@@ -31,11 +31,22 @@
 
         <div class="container">
             <form action="{{ url_for('photon2_tab2') }}" method="post" enctype="multipart/form-data" class="box">
-                <label for="fsignal">Upload Signal CSV:</label><br>
-                <input type="file" id="fsignal" name="fsignal" required><br><br>
+                <div class="row">
+                    <div>
+                        <label for="fsignal">Upload signals.csv:</label><br>
+                        <input type="file" id="fsignal" name="fsignal"><br><br>
 
-                <label for="fevents">Upload Events CSV:</label><br>
-                <input type="file" id="fevents" name="fevents" required><br><br>
+                        <label for="fevents">Upload events.csv:</label><br>
+                        <input type="file" id="fevents" name="fevents"><br><br>
+                    </div>
+                    <div>
+                        <label for="ffolder">OR Upload a folder containing all these files:</label>
+                        <p class="description">Files must be named exactly as the left</p>
+                        <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory="" mozdirectory=""><br><br>
+                    </div>
+                </div>
+
+                <hr />
 
                 <label for="fs">Sampling Rate:</label><br>
                 <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
