@@ -29,8 +29,6 @@ h1 {
 
 .row {
     display: grid;
-    grid-template-columns: 50% auto;
-    column-gap: 20px;
 }
 
 .container {
