@@ -4,8 +4,10 @@ import glob
 import pickle
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import plotly.express as px
 import utils
 import random
+import pandas as pd
 
 # method options are 'single', 'f2a', 'root_dir'
 def define_params(fs = 5, opto_blank_frame = False, num_rois = 10, selected_conditions = None, flag_normalization = "dff_perc", fsignal = "VJ_OFCVTA_7_260_D6_neuropil_corrected_signals_15_50_beta_0.8.csv", fevents="event_times_VJ_OFCVTA_7_260_D6_trained.csv"):
@@ -316,28 +318,24 @@ def time_series_plot_tab1(s2p_data_dict, path_dict, plot_vars):
         tvec = tvec[sample_start:sample_end]
         trace_data_selected = trace_data_selected[:, sample_start:sample_end]
 
-    # Create a list of traces for each ROI
-    traces = []
-    for idx in range(plot_vars['num_rois_to_tseries']):
-        to_plot = trace_data_selected[idx]
-        roi_trace = go.Scatter(x=tvec, y=to_plot, mode='lines', line=dict(color=plot_vars['colors_roi'][idx]))
-        traces.append(roi_trace)
+    # Create a DataFrame for the trace data
+    df_trace_data = pd.DataFrame(trace_data_selected.T, columns=[f"ROI {roi}" for roi in plot_vars['rois_to_tseries']])
+    df_trace_data['Time (s)'] = tvec
 
-    # Create the figure
-    fig = go.Figure(data=traces)
+    # Melt the DataFrame to have a 'variable' column for ROI names and 'value' column for trace values
+    df_trace_data_melted = pd.melt(df_trace_data, id_vars=['Time (s)'], value_vars=[f"ROI {roi}" for roi in plot_vars['rois_to_tseries']])
+
+    # Create the figure using plotly.express
+    fig = px.line(df_trace_data_melted, x='Time (s)', y='value', color='variable')
+
     # Update layout
     fig.update_layout(
         margin=dict(t=40),
         xaxis_title="Time (s)",
         yaxis_title="Fluorescence Level",
-        showlegend=False,
-        font=dict(family="Arial", size=15),
-        height=54  # Set the height to 54 pixels
+        showlegend=True,
+        font=dict(family="Arial", size=15)
     )
-
-    # Add titles to each subplot
-    for idx in range(plot_vars['num_rois_to_tseries']):
-        fig.update_layout(title=f"ROI {plot_vars['rois_to_tseries'][idx]}", yaxis=dict(domain=[idx * 0.2, (idx + 1) * 0.2]))
 
     return fig
 

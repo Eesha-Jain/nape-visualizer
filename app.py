@@ -5,7 +5,12 @@ from drive import upload, delete_folder
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
-def tab1():
+def photon():
+    graphJSON = None
+    return render_template('photon.html', graphJSON=graphJSON)
+
+@app.route('/2photon/tab1', methods=['GET', 'POST'])
+def photon2_tab1():
     if request.method == "POST":
         ff = request.files["ff"]
         ffneu = request.files["ffneu"]
@@ -62,10 +67,10 @@ def tab1():
         graph2JSON = None
         graph3JSON = None
 
-    return render_template('tab1.html', graph1JSON=graph1JSON, graph2JSON=graph2JSON, graph3JSON=graph3JSON)
+    return render_template('2photon/tab1.html', graph1JSON=graph1JSON, graph2JSON=graph2JSON, graph3JSON=graph3JSON)
 
-@app.route('/tab2', methods=['GET', 'POST'])
-def tab2():
+@app.route('/2photon/tab2', methods=['GET', 'POST'])
+def photon2_tab2():
     if request.method == "POST":
         fs = int(request.form.get('fs'))
         opto_blank_frame = False if request.form.get('opto_blank_frame') == "false" else True
@@ -94,7 +99,7 @@ def tab2():
         fparams = define_params()
         graphJSON = None
 
-    return render_template('tab2.html', graphJSON=graphJSON, fparams=fparams)
+    return render_template('2photon/tab2.html', graphJSON=graphJSON, fparams=fparams)
 
 if __name__ == '__main__':
     app.run(debug=True)
