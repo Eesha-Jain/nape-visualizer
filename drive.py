@@ -11,7 +11,7 @@ from werkzeug.datastructures import FileStorage
 # Google OAuth2 credentials
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 SERVICE_ACCOUNT_KEY_FILE = 'token.json'
-PARENT_FOLDER_ID = '1oj_F0Auv6qvwPp7dPAZzWnv6as44_7Hc'
+PARENT_FOLDER_ID = '1YPLWqRfp7-0xO_WikeDE9kZNWXCl2qO5'
 
 def create_drive_service():
     # Create a service account credentials object
