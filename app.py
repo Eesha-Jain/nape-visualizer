@@ -160,22 +160,5 @@ def photon2_tab2():
 
     return render_template('2photon/tab2.html', graphJSON=graphJSON, fparams=fparams)
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    # X-Hub-Signature-256: sha256=<hash>
-    sig_header = 'X-Hub-Signature-256'
-    if sig_header in request.headers:
-        header_splitted = request.headers[sig_header].split("=")
-        if len(header_splitted) == 2:
-            req_sign = header_splitted[1]
-            computed_sign = hmac.new(secrets.webhook, request.data, hashlib.sha256).hexdigest()
-            # is the provided signature ok?
-            if hmac.compare_digest(req_sign, computed_sign):
-                # create a thread to return a response (so GitHub is happy) and start a 2s timer before exiting this app
-                # this is supposed to be run by systemd unit which will restart it automatically
-                # the [] syntax for lambda allows to have 2 statements
-                threading.Thread(target=lambda: [time.sleep(2), os._exit(-1)]).start()
-    return "ok"
-
 if __name__ == '__main__':
     app.run(debug=True)
