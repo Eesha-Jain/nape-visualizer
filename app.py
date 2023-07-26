@@ -1,3 +1,9 @@
+import hashlib
+import hmac
+import os
+import secrets
+import threading
+import time
 from flask import Flask, render_template, request
 from plots import generate_graph_tab2, define_params, contour_plot_tab1, time_series_plot_tab1, heatmap_plot_tab1, prep_plotting_rois, define_paths_roi_plots, load_s2p_data_roi_plots, masks_init
 from drive import upload, delete_folder
@@ -153,6 +159,23 @@ def photon2_tab2():
         graphJSON = None
 
     return render_template('2photon/tab2.html', graphJSON=graphJSON, fparams=fparams)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    # X-Hub-Signature-256: sha256=<hash>
+    sig_header = 'X-Hub-Signature-256'
+    if sig_header in request.headers:
+        header_splitted = request.headers[sig_header].split("=")
+        if len(header_splitted) == 2:
+            req_sign = header_splitted[1]
+            computed_sign = hmac.new(secrets.webhook, request.data, hashlib.sha256).hexdigest()
+            # is the provided signature ok?
+            if hmac.compare_digest(req_sign, computed_sign):
+                # create a thread to return a response (so GitHub is happy) and start a 2s timer before exiting this app
+                # this is supposed to be run by systemd unit which will restart it automatically
+                # the [] syntax for lambda allows to have 2 statements
+                threading.Thread(target=lambda: [time.sleep(2), os._exit(-1)]).start()
+    return "ok"
 
 if __name__ == '__main__':
     app.run(debug=True)
