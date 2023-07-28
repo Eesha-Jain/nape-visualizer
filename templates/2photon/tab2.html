@@ -83,6 +83,7 @@
 
         <script type="text/javascript">
             var graphJSON = {{ graphJSON | safe }};
+            console.log(graphJSON);
 
             if (graphJSON != NaN) {
                 Plotly.react('chart-container', graphJSON.data, graphJSON.layout, {displayModeBar: true});
