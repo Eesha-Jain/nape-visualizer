@@ -93,7 +93,6 @@
     <script type="text/javascript">
         // Get the graph data from the Flask app
         var graph1JSON = {{ graph1JSON | safe }};
-        console.log(graph1JSON);
 
         if (graph1JSON != NaN) {
             Plotly.react('chart1-container', graph1JSON.data, graph1JSON.layout, { displayModeBar: true });

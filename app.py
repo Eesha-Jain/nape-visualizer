@@ -114,17 +114,11 @@ def photon2_tab1():
 @app.route('/2photon/tab2', methods=['GET', 'POST'])
 def photon2_tab2():
     if request.method == "POST":
-        print("inside")
         fs = int(request.form.get('fs'))
         opto_blank_frame = False if request.form.get('opto_blank_frame') == "false" else True
         num_rois = "all" if request.form.get('num_rois') == "all" else int(request.form.get('num_rois'))
         selected_conditions = None if request.form.get('selected_conditions') == "None" else request.form.get('selected_conditions')
         flag_normalization = request.form.get('flag_normalization')
-        print(fs)
-        print(opto_blank_frame)
-        print(num_rois)
-        print(selected_conditions)
-        print(flag_normalization)
 
         #Assigning files from input to variables based on whether they were uploaded individually or if a folder was uploaded
         try:
