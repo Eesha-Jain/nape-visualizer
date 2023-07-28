@@ -34,46 +34,52 @@
     <h1>NAPE Visualization Tool</h1>
 
     <div class="container">
-        <form action="{{ url_for('photon2_tab1') }}" method="post" enctype="multipart/form-data" class="box">
-            <div class="row">
-                <div>
-                    <label for="ff">Upload f.npy:</label><br>
-                    <input type="file" id="ff" name="ff"><br><br>
+        <form action="{{ url_for('photon2_tab1') }}" method="post" enctype="multipart/form-data" class="box box-inputs">
+            <div style="margin: 10px;">
+                <div class="row">
+                    <div>
+                        <label for="ff">Upload f.npy:</label><br>
+                        <input type="file" id="ff" name="ff"><br><br>
 
-                    <label for="ffneu">Upload fneu.npy</label><br>
-                    <input type="file" id="ffneu" name="ffneu"><br><br>
+                        <label for="ffneu">Upload fneu.npy</label><br>
+                        <input type="file" id="ffneu" name="ffneu"><br><br>
 
-                    <label for="fiscell">Upload iscell.npy</label><br>
-                    <input type="file" id="fiscell" name="fiscell"><br><br>
+                        <label for="fiscell">Upload iscell.npy</label><br>
+                        <input type="file" id="fiscell" name="fiscell"><br><br>
 
-                    <label for="fops">Upload ops.npy</label><br>
-                    <input type="file" id="fops" name="fops"><br><br>
+                        <label for="fops">Upload ops.npy</label><br>
+                        <input type="file" id="fops" name="fops"><br><br>
 
-                    <label for="fspks">Upload spks.npy</label><br>
-                    <input type="file" id="fspks" name="fspks"><br><br>
+                        <label for="fspks">Upload spks.npy</label><br>
+                        <input type="file" id="fspks" name="fspks"><br><br>
 
-                    <label for="fstat">Upload stat.npy</label><br>
-                    <input type="file" id="fstat" name="fstat"><br><br>
+                        <label for="fstat">Upload stat.npy</label><br>
+                        <input type="file" id="fstat" name="fstat"><br><br>
+                    </div>
+                    <div>
+                        <label for="ffolder">OR Upload a folder containing all these files:</label>
+                        <p class="description">Files must be named exactly as the left</p>
+                        <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory=""
+                            mozdirectory=""><br><br>
+                    </div>
                 </div>
-                <div>
-                    <label for="ffolder">OR Upload a folder containing all these files:</label>
-                    <p class="description">Files must be named exactly as the left</p>
-                    <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory="" mozdirectory=""><br><br>
-                </div>
+                <hr />
+                <label for="show_labels">Show Labels:</label><br>
+                <input type="checkbox" id="show_labels" name="show_labels" value="{{ fparams['show_labels'] }}"><br><br>
+
+                <label for="tseries_start_end">T-series Start to End:</label>
+                <p class="description">Set to "None" will plot the whole session</p>
+                <input type="text" id="tseries_start_end" name="tseries_start_end"
+                    value="{{ fparams['tseries_start_end'] }}" required><br><br>
+
+                <label for="rois_to_plot">ROIs to Plot:</label>
+                <p class="description">This can be a list of select ROIs, an integer n containing the first n ROIs to
+                    plot, or "None" to plot all valid ROIs</p>
+                <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}"
+                    required><br><br>
+
+                <div class="flex"><input type="submit" value="Submit" /></div>
             </div>
-            <hr />
-            <label for="show_labels">Show Labels:</label><br>
-            <input type="checkbox" id="show_labels" name="show_labels" value="{{ fparams['show_labels'] }}"><br><br>
-
-            <label for="tseries_start_end">T-series Start to End:</label>
-            <p class="description">Set to "None" will plot the whole session</p>
-            <input type="text" id="tseries_start_end" name="tseries_start_end" value="{{ fparams['tseries_start_end'] }}" required><br><br>
-
-            <label for="rois_to_plot">ROIs to Plot:</label>
-            <p class="description">This can be a list of select ROIs, an integer n containing the first n ROIs to plot, or "None" to plot all valid ROIs</p>
-            <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}" required><br><br>
-
-            <div class="flex"><input type="submit" value="Submit" /></div>
         </form>
         <br /><br />
         <div class="box" style="padding: 0;">

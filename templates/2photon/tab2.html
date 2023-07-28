@@ -1,36 +1,41 @@
 <!doctype html>
 <html>
-    <head>
-        <title>NAPE Visualization Tool</title>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        
-        <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
-        <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='style.css')}}">
-        <link rel="stylesheet"  type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <div class="navbar">
-            <a href="/">Photometry</a>
-            <div class="dropdown">
-                <button class="dropbtn">2-Photon
-                    <i class="fa fa-caret-down"></i>
-                </button>
-                <div class="dropdown-content">
-                    <a href="/2photon/tab1">Tab 1</a>
-                    <a href="/2photon/tab2" class="active">Tab 2</a>
-                </div>
+<head>
+    <title>NAPE Visualization Tool</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/">Photometry</a>
+        <div class="dropdown">
+            <button class="dropbtn">2-Photon
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="/2photon/tab1">Tab 1</a>
+                <a href="/2photon/tab2" class="active">Tab 2</a>
             </div>
         </div>
-    
-        <h1>NAPE Visualization Tool</h1>
+    </div>
 
-        <div class="container">
-            <form action="{{ url_for('photon2_tab2') }}" method="post" enctype="multipart/form-data" class="box">
+    <h1>NAPE Visualization Tool</h1>
+
+    <div class="container">
+        <form action="{{ url_for('photon2_tab2') }}" method="post" enctype="multipart/form-data" class="box">
+            <div style="margin: 10px;">
                 <div class="row">
                     <div>
                         <label for="fsignal">Upload signals.csv:</label><br>
@@ -42,7 +47,8 @@
                     <div>
                         <label for="ffolder">OR Upload a folder containing all these files:</label>
                         <p class="description">Files must be named exactly as the left</p>
-                        <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory="" mozdirectory=""><br><br>
+                        <input name="ffolder" type="file" id="files" multiple="" directory="" webkitdirectory=""
+                            mozdirectory=""><br><br>
                     </div>
                 </div>
 
@@ -53,7 +59,8 @@
 
                 <label for="opto_blank_frame">Opto Blank Frame:</label>
                 <p class="description">If PMTs were blanked during stim, set stim times to NaN (instead of 0)</p>
-                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" value="{{ fparams['opto_blank_frame'] }}"><br><br>
+                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame"
+                    value="{{ fparams['opto_blank_frame'] }}"><br><br>
 
                 <label for="num_rois">Number of Rois:</label>
                 <p class="description">Set to "all" if want to show all cells</p>
@@ -61,10 +68,12 @@
 
                 <label for="selected_conditions">Selected Conditions:</label>
                 <p class="description">Set to "None" if want to include all conditions from behavior data</p>
-                <input type="text" id="selected_conditions" name="selected_conditions" value="{{ fparams['selected_conditions'] }}" required><br><br>
+                <input type="text" id="selected_conditions" name="selected_conditions"
+                    value="{{ fparams['selected_conditions'] }}" required><br><br>
 
                 <label for="flag_normalization">Flag Normalization:</label>
-                <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}" required>
+                <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}"
+                    required>
                     <option value="dff_perc">dff_perc</option>
                     <option value="dff">dff</option>
                     <option value="zscore">zscore</option>
@@ -72,21 +81,23 @@
                 </select><br><br>
 
                 <div class="flex"><input type="submit" value="Submit" /></div>
-            </form> 
-            <br /><br />
-            <!-- The container for the plotly chart -->
-            <div class="box" style="padding: 0;">
-                <div id="chart-container"></div>
             </div>
+        </form>
+        <br /><br />
+        <!-- The container for the plotly chart -->
+        <div class="box" style="padding: 0;">
+            <div id="chart-container"></div>
         </div>
-        <br />
+    </div>
+    <br />
 
-        <script type="text/javascript">
-            var graphJSON = {{ graphJSON | safe }};
+    <script type="text/javascript">
+        var graphJSON = {{ graphJSON | safe }};
 
-            if (graphJSON != NaN) {
-                Plotly.react('chart-container', graphJSON.data, graphJSON.layout, {displayModeBar: true});
-            }
-        </script>
-    </body>
+        if (graphJSON != NaN) {
+            Plotly.react('chart-container', graphJSON.data, graphJSON.layout, { displayModeBar: true });
+        }
+    </script>
+</body>
+
 </html>
