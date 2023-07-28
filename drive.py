@@ -7,10 +7,12 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaInMemoryUpload, MediaIoBaseDownload
 import io
 from werkzeug.datastructures import FileStorage
+from pathlib import Path
 
 # Google OAuth2 credentials
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
-SERVICE_ACCOUNT_KEY_FILE = 'token.json'
+THIS_FOLDER = Path(__file__).parent.resolve()
+SERVICE_ACCOUNT_KEY_FILE = THIS_FOLDER / 'token.json'
 PARENT_FOLDER_ID = '1YPLWqRfp7-0xO_WikeDE9kZNWXCl2qO5'
 
 def create_drive_service():
@@ -22,7 +24,7 @@ def create_drive_service():
     creds.refresh(auth_req)
 
     # Build the Google Drive service using the credentials
-    drive_service = build('drive', 'v3', credentials=creds)
+    drive_service = build('drive', 'v3', credentials=creds, static_discovery=False)
 
     return drive_service
 

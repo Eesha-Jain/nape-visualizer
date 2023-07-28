@@ -45,18 +45,15 @@ def photon2_tab1():
             fspks = files_dict["spks.npy"]
             fstat = files_dict["stat.npy"]
         
-        try:
-            file_ids, folder_id = upload([ff, ffneu, fiscell, fops, fspks, fstat])
-            file_ids_dict = {
-                "f": file_ids[0],
-                "fneu": file_ids[1],
-                "iscell": file_ids[2],
-                "ops": file_ids[3],
-                "spks": file_ids[4],
-                "stat": file_ids[5]
-            }
-        except Exception as e:
-            print(e)
+        file_ids, folder_id = upload([ff, ffneu, fiscell, fops, fspks, fstat])
+        file_ids_dict = {
+            "f": file_ids[0],
+            "fneu": file_ids[1],
+            "iscell": file_ids[2],
+            "ops": file_ids[3],
+            "spks": file_ids[4],
+            "stat": file_ids[5]
+        }
         
         #Assign user inputs to fparams
         fparams = {
