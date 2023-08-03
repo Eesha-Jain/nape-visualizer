@@ -28,7 +28,7 @@ def create_drive_service():
 
     return drive_service
 
-def upload(files):
+def upload_to_drive(files):
     # Get the credentials and create a Google Drive client
     drive_service = create_drive_service()
 
@@ -103,6 +103,24 @@ def get_file_by_id(file_id):
         return file_storage
 
     return None
+
+def get_contents(file_id):
+    file_obj = get_file_by_id(file_id)
+    file_obj.seek(0)
+    return file_obj.read()
+
+def get_contents_bytefile(file_id):
+    file_content = get_contents(file_id)
+    return io.BytesIO(file_content)
+
+def get_contents_string(file_id):
+    file_obj = get_file_by_id(file_id)
+
+    file_obj.seek(0)
+    file_content = file_obj.read()
+    csv_string = file_content.decode('utf-8')
+
+    return io.StringIO(csv_string)
 
 def delete_folder(folder_id):
     drive_service = create_drive_service()
