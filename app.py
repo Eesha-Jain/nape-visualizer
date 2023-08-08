@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
 from analysis import upload_inputted_files, Photon2Tab1, Photon2Tab2
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -14,12 +16,15 @@ def photon2_tab1():
         folder_id, file_ids_dict = upload_inputted_files(request, ["f", "fneu", "iscell", "ops", "spks", "stat"], ".npy")
         data_generator = Photon2Tab1(request, file_ids_dict, folder_id)
         fparams, jsons = data_generator.generate_full_output()
-        
-        graph1JSON = jsons[0]
+
+        buf = BytesIO()
+        jsons[0].savefig(buf, format="png", bbox_inches='tight', pad_inches=0)
+
+        graph1 = base64.b64encode(buf.getbuffer()).decode("ascii")
         graph2JSON = jsons[1]
         graph3JSON = jsons[2]
     else:
-        graph1JSON = None
+        graph1 = ""
         graph2JSON = None
         graph3JSON = None
         fparams = {
@@ -28,7 +33,7 @@ def photon2_tab1():
             "rois_to_plot": None
         }
 
-    return render_template('photon2/tab1.html', graph1JSON=graph1JSON, graph2JSON=graph2JSON, graph3JSON=graph3JSON, fparams=fparams)
+    return render_template('photon2/tab1.html', graph1=graph1, graph2JSON=graph2JSON, graph3JSON=graph3JSON, fparams=fparams)
 
 @app.route('/photon2/tab2', methods=['GET', 'POST'])
 def photon2_tab2():

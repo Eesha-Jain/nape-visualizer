@@ -103,8 +103,7 @@ class Photon2Tab1(Photon2):
 
         data_plotter = S2PActivityPlot(data_processor)
         
-        chart_contour = data_plotter.generate_contour_plot(package="plotly")
-        graph1JSON = chart_contour.to_json()
+        chart_contour = data_plotter.generate_contour_plot(package="matplotlib")
 
         chart_time = data_plotter.generate_time_series_plot(package="plotly")
         graph2JSON = chart_time.to_json()
@@ -112,7 +111,7 @@ class Photon2Tab1(Photon2):
         chart_heat = data_plotter.generate_heatmap_plot(package="plotly")
         graph3JSON = chart_heat.to_json()
 
-        return [graph1JSON, graph2JSON, graph3JSON]
+        return [chart_contour, graph2JSON, graph3JSON]
     
     def generate_full_output(self):
         self.generate_params()
@@ -149,8 +148,8 @@ class Photon2Tab2(Photon2):
         self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
 
     def generate_plots(self):
-        data_processor = EventTicksProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization)
-        data_processor.load_all_data(self.contents["signals"], self.contents["events"])
+        data_processor = EventTicksProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["events"])
+        data_processor.generate_all_data()
 
         data_plotter = EventTicksPlot(data_processor)
         fig = data_plotter.generate_session_plot()

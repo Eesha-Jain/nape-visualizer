@@ -73,7 +73,7 @@
                     value="{{ fparams['tseries_start_end'] }}" required><br><br>
 
                 <label for="rois_to_plot">ROIs to Plot:</label>
-                <p class="description">This can be a list of select ROIs, an integer n containing the first n ROIs to
+                <p class="description">This can be a list of select ROIs (Format: 1,2,3), an integer n containing the first n ROIs to
                     plot, or "None" to plot all valid ROIs</p>
                 <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}"
                     required><br><br>
@@ -82,7 +82,7 @@
             </div>
         </form>
         <div class="box" style="padding: 0;">
-            <div id="chart1-container"></div>
+            <div id="chart1-container" style="padding: 10px;"><img src='data:image/png;base64,{{ graph1 | safe }}' width="100%" height="auto"/></div>
         </div>
         <div class="box" style="padding: 0;">
             <div id="chart2-container"></div>
@@ -94,13 +94,7 @@
     <br />
 
     <script type="text/javascript">
-        // Get the graph data from the Flask app
-        var graph1JSON = {{ graph1JSON | safe }};
-
-        if (graph1JSON != NaN) {
-            Plotly.react('chart1-container', graph1JSON.data, graph1JSON.layout, { displayModeBar: true });
-        }
-
+        // Get graph JSON from Flask backend
         var graph2JSON = {{ graph2JSON | safe }};
 
         if (graph2JSON != NaN) {
