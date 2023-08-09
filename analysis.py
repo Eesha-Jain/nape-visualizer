@@ -1,7 +1,14 @@
 from drive import upload_to_drive, delete_folder, get_contents_bytefile, get_contents_string
-from visualizer.data import S2PActivityProcessor, EventTicksProcessor
-from visualizer.plots import S2PActivityPlot, EventTicksPlot
+from visualizer.data import S2PActivityProcessor, EventTicksProcessor, EventAnalysisProcessor
+from visualizer.plots import S2PActivityPlot, EventTicksPlot, EventAnalysisPlot
 from abc import ABC, abstractmethod
+from io import BytesIO
+import base64
+
+def get_encoded(chart):
+    buf = BytesIO()
+    chart.savefig(buf, format="png", bbox_inches='tight', pad_inches=0)
+    return base64.b64encode(buf.getbuffer()).decode("ascii")
 
 def upload_inputted_files(request, file_names, file_extension):
     files = []
@@ -165,3 +172,81 @@ class Photon2Tab2(Photon2):
         delete_folder(self.folder_id)
 
         return self.fparams, jsons
+
+class Photon2Tab3(Photon2):
+    def __init__(self, request, file_ids_dict, folder_id):
+        super().__init__(request, file_ids_dict, folder_id)
+
+    def generate_params(self):
+        self.fparams = {
+            'fs': self.request.form.get('fs'),
+            'selected_conditions': self.request.form.get('selected_conditions'),
+            'trial_start_end': self.request.form.get('trial_start_end'),
+            'flag_normalization': self.request.form.get('flag_normalization'),
+            'baseline_end': self.request.form.get('baseline_end'),
+            'event_dur': self.request.form.get('event_dur'),
+            'event_sort_analysis_win': self.request.form.get('event_sort_analysis_win'),
+            'opto_blank_frame': self.request.form.get('opto_blank_frame'),
+            'flag_sort_rois': self.request.form.get('flag_sort_rois'),
+            'user_sort_method': self.request.form.get('user_sort_method'),
+            'roi_sort_cond': self.request.form.get('roi_sort_cond'),
+            'flag_roi_trial_avg_errbar': self.request.form.get('flag_roi_trial_avg_errbar'),
+            'flag_trial_avg_errbar': self.request.form.get('flag_trial_avg_errbar'),
+            'interesting_rois': self.request.form.get('interesting_rois'),
+            'data_trial_resolved_key': self.request.form.get('data_trial_resolved_key'),
+            'data_trial_avg_key': self.request.form.get('data_trial_avg_key'),
+            'cmap_': self.request.form.get('cmap_'),
+            'ylabel': self.request.form.get('ylabel')
+        }
+
+        if self.request.form.get('selected_conditions') == "None":
+            selected_conditions = None
+        else:
+            selected_conditions_split = self.request.form.get('selected_conditions').split(",")
+            selected_conditions = [int(item) for item in selected_conditions_split]
+
+        self.processor_fparams = {
+            'fs': int(self.request.form.get('fs')),
+            'selected_conditions': selected_conditions,
+            'trial_start_end': [int(item) for item in self.request.form.get('trial_start_end').split(",")],
+            'flag_normalization': None if self.request.form.get('flag_normalization') == "None" else self.request.form.get('flag_normalization'),
+            'baseline_end': float(self.request.form.get('baseline_end')),
+            'event_dur': int(self.request.form.get('event_dur')),
+            'event_sort_analysis_win': [int(item) for item in self.request.form.get('event_sort_analysis_win').split(",")],
+            'opto_blank_frame': False if self.fparams["opto_blank_frame"] == "false" else True,
+            'flag_sort_rois': False if self.fparams["flag_sort_rois"] == "false" else True,
+            'user_sort_method': self.request.form.get('user_sort_method'),
+            'roi_sort_cond': self.request.form.get('roi_sort_cond'),
+            'flag_roi_trial_avg_errbar': False if self.fparams["flag_roi_trial_avg_errbar"] == "false" else True,
+            'flag_trial_avg_errbar': False if self.fparams["flag_trial_avg_errbar"] == "false" else True,
+            'interesting_rois': [int(item) for item in self.request.form.get('interesting_rois').split(",")],
+            'data_trial_resolved_key': self.request.form.get('data_trial_resolved_key'),
+            'data_trial_avg_key': self.request.form.get('data_trial_avg_key'),
+            'cmap_': None if self.request.form.get('cmap_') == "None" else self.request.form.get('cmap_'),
+            'ylabel': self.request.form.get('ylabel')
+        }
+
+    def get_contents(self):
+        self.contents = {}
+
+        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
+        self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
+
+    def generate_plots(self):
+        data_processor = EventAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["events"])
+        data_processor.generate_all_data()
+        num_rois = data_processor.get_num_rois()
+
+        data_plotter = EventAnalysisPlot(data_processor)
+        figs = data_plotter.generate_roi_plots()
+
+        return figs, num_rois
+    
+    def generate_full_output(self):
+        self.generate_params()
+        self.get_contents()
+        jsons, num_rois = self.generate_plots()
+
+        delete_folder(self.folder_id)
+
+        return self.fparams, jsons, num_rois

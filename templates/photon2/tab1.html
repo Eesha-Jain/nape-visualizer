@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool</title>
+    <title>NAPE Visualization Tool | Photon2 | Tab 1</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -27,6 +27,7 @@
             <div class="dropdown-content">
                 <a href="/photon2/tab1" class="active">Tab 1</a>
                 <a href="/photon2/tab2">Tab 2</a>
+                <a href="/photon2/tab3">Tab 3</a>
             </div>
         </div>
     </div>
@@ -81,15 +82,21 @@
                 <div class="flex"><input type="submit" value="Submit" /></div>
             </div>
         </form>
-        <div class="box" style="padding: 0;">
-            <div id="chart1-container" style="padding: 10px;"><img src='data:image/png;base64,{{ graph1 | safe }}' width="100%" height="auto"/></div>
-        </div>
-        <div class="box" style="padding: 0;">
-            <div id="chart2-container"></div>
-        </div>
-        <div class="box" style="padding: 0;">
-            <div id="chart3-container"></div>
-        </div>
+        {% if graph1 %}
+            <div class="box" style="padding: 0;">
+                <div id="chart1-container" style="padding: 10px;"><img src='data:image/png;base64,{{ graph1 | safe }}' width="100%" height="auto"/></div>
+            </div>
+        {% endif %}
+        {% if graph2JSON %}
+            <div class="box" style="padding: 0;">
+                <div id="chart2-container"></div>
+            </div>
+        {% endif %}
+        {% if graph3JSON %}
+            <div class="box" style="padding: 0;">
+                <div id="chart3-container"></div>
+            </div>
+        {% endif %}
     </div>
     <br />
 

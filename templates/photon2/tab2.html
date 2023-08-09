@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool</title>
+    <title>NAPE Visualization Tool | Photon2 | Tab 2</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -27,6 +27,7 @@
             <div class="dropdown-content">
                 <a href="/photon2/tab1">Tab 1</a>
                 <a href="/photon2/tab2" class="active">Tab 2</a>
+                <a href="/photon2/tab3">Tab 3</a>
             </div>
         </div>
     </div>
@@ -71,7 +72,7 @@
                 <input type="text" id="selected_conditions" name="selected_conditions"
                     value="{{ fparams['selected_conditions'] }}" required><br><br>
 
-                <label for="flag_normalization">Flag Normalization:</label>
+                <label for="flag_normalization">Normalization:</label>
                 <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}"
                     required>
                     <option value="dff_perc">dff_perc</option>
@@ -83,10 +84,11 @@
                 <div class="flex"><input type="submit" value="Submit" /></div>
             </div>
         </form>
-        <!-- The container for the plotly chart -->
-        <div class="box" style="padding: 0;">
-            <div id="chart-container"></div>
-        </div>
+        {% if graphJSON %}
+            <div class="box" style="padding: 0;">
+                <div id="chart-container"></div>
+            </div>
+        {% endif %}
     </div>
     <br />
 
