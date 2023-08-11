@@ -25,9 +25,9 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="/photon2/tab1" class="active">Tab 1</a>
-                <a href="/photon2/tab2">Tab 2</a>
-                <a href="/photon2/tab3">Tab 3</a>
+                <a href="/photon2/tab1" class="active">Suite2P ROI Trace</a>
+                <a href="/photon2/tab2">Whole Session</a>
+                <a href="/photon2/tab3">Event Analysis</a>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
                 </div>
                 <hr />
                 <label for="show_labels">Show Labels:</label><br>
-                <input type="checkbox" id="show_labels" name="show_labels" value="{{ fparams['show_labels'] }}"><br><br>
+                <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{% endif %}><br><br>
 
                 <label for="tseries_start_end">T-series Start to End:</label>
                 <p class="description">Set to "None" will plot the whole session</p>
@@ -89,12 +89,12 @@
         {% endif %}
         {% if graph2JSON %}
             <div class="box" style="padding: 0;">
-                <div id="chart2-container"></div>
+                <div id="chart2-container" style="margin-left: 5px;"></div>
             </div>
         {% endif %}
         {% if graph3JSON %}
             <div class="box" style="padding: 0;">
-                <div id="chart3-container"></div>
+                <div id="chart3-container" style="margin-left: 5px; margin-bottom: 5px;"></div>
             </div>
         {% endif %}
     </div>

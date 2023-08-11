@@ -25,9 +25,9 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="/photon2/tab1">Tab 1</a>
-                <a href="/photon2/tab2" class="active">Tab 2</a>
-                <a href="/photon2/tab3">Tab 3</a>
+                <a href="/photon2/tab1">Suite2P ROI Trace</a>
+                <a href="/photon2/tab2" class="active">Whole Session</a>
+                <a href="/photon2/tab3">Event Analysis</a>
             </div>
         </div>
     </div>
@@ -60,8 +60,7 @@
 
                 <label for="opto_blank_frame">Opto Blank Frame:</label>
                 <p class="description">If PMTs were blanked during stim, set stim times to NaN (instead of 0)</p>
-                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame"
-                    value="{{ fparams['opto_blank_frame'] }}"><br><br>
+                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
 
                 <label for="num_rois">Number of Rois:</label>
                 <p class="description">Set to "all" if want to show all cells</p>

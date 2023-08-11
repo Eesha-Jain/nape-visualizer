@@ -25,9 +25,9 @@
                 <i class="fa fa-caret-down"></i>
             </button>
             <div class="dropdown-content">
-                <a href="/photon2/tab1">Tab 1</a>
-                <a href="/photon2/tab2">Tab 2</a>
-                <a href="/photon2/tab3" class="active">Tab 3</a>
+                <a href="/photon2/tab1">Suite2P ROI Trace</a>
+                <a href="/photon2/tab2">Whole Session</a>
+                <a href="/photon2/tab3" class="active">Event Analysis</a>
             </div>
         </div>
     </div>
@@ -97,8 +97,7 @@
                         <label for="opto_blank_frame">Opto Blank Frame:</label>
                         <p class="description">If PMTs were blanked during stim, set stim times to None
                         </p>
-                        <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame"
-                            value="{{ fparams['opto_blank_frame'] }}"><br><br>
+                        <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
 
                         <label for="data_trial_resolved_key">Trial Resolved Key:</label><br />
                         <input type="text" id="data_trial_resolved_key" name="data_trial_resolved_key"
@@ -108,8 +107,7 @@
                     <div>
                         <label for="flag_sort_rois">Sort ROIs:</label>
                         <p class="description">If true, ROIs are sorted by activity</p>
-                        <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois"
-                            value="{{ fparams['flag_sort_rois'] }}"><br><br>
+                        <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois" {% if fparams['flag_sort_rois']  %}checked{% endif %}><br><br>
 
                         <label for="user_sort_method">User Sort Method:</label>
                         <p class="description">peak_time or max_value</p>
@@ -123,13 +121,11 @@
 
                         <label for="flag_roi_trial_avg_errbar">ROI Trial Average Error Bar</label>
                         <p class="description">Toggle to show error bar on roi- and trial-averaged traces</p>
-                        <input type="checkbox" id="flag_roi_trial_avg_errbar" name="flag_roi_trial_avg_errbar"
-                            value="{{ fparams['flag_roi_trial_avg_errbar'] }}"><br><br>
+                        <input type="checkbox" id="flag_roi_trial_avg_errbar" name="flag_roi_trial_avg_errbar" {% if fparams['flag_roi_trial_avg_errbar']  %}checked{% endif %}><br><br>
 
                         <label for="flag_trial_avg_errbar">Trial Average Error Bar:</label>
                         <p class="description">Toggle to show error bars on the trial-avg traces</p>
-                        <input type="checkbox" id="flag_trial_avg_errbar" name="flag_trial_avg_errbar"
-                            value="{{ fparams['flag_trial_avg_errbar'] }}"><br><br>
+                        <input type="checkbox" id="flag_trial_avg_errbar" name="flag_trial_avg_errbar" {% if fparams['flag_trial_avg_errbar'] %}checked{% endif %}><br><br>
 
                         <label for="interesting_rois">Interesting ROIs:</label>
                         <p class="description">Should be in a list in the following format: 1,2</p>
@@ -175,10 +171,10 @@
         function showGraphs() {
             try {
                 var selectedROI = Number(select.value);
-                chart.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList[selectedROI].heatmap}' width="100%" height="auto"/></div><div id="chart2-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList[selectedROI].linegraph}' width="50%" height="auto"/></div><div id="chart3-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList[selectedROI].bargraph}' width="50%" height="auto"/></div>`;
+                chart.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList[selectedROI].heatmap}' width="100%" height="auto"/></div><div id="chart2-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList[selectedROI].linegraph}' width="50%" height="auto"/></div>`;
             } catch (e) {
                 var lastElement = graphList[graphList.length - 1];
-                chart.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${lastElement.heatmap}' width="100%" height="auto"/></div>`;
+                chart.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${lastElement.heatmap}' width="100%" height="auto"/></div><div id="chart2-container" style="padding: 20px;"><img src='data:image/png;base64,${lastElement.linegraph}' width="50%" height="auto"/></div><div id="chart3-container" style="padding: 20px;"><img src='data:image/png;base64,${lastElement.bargraph}' width="50%" height="auto"/></div>`;
             }
         }
 

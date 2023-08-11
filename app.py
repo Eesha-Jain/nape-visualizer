@@ -42,7 +42,7 @@ def photon2_tab2():
         graphJSON = None
         fparams = {
             "fs": 5,
-            "opto_blank_frame": True,
+            "opto_blank_frame": "true",
             "num_rois": 10, 
             "selected_conditions": None,
             "flag_normalization": "dff_perc"
@@ -61,13 +61,15 @@ def photon2_tab3():
 
         for chart in matCharts:
             graphBytes = {}
-            if "heatmap" in chart:
+            
+            if "heatmap" in chart and chart["heatmap"]:
                 graphBytes["heatmap"] = get_encoded(chart["heatmap"])
-            if "linegraph" in chart:
+            if "linegraph" in chart and chart["linegraph"]:
                 graphBytes["linegraph"] = get_encoded(chart["linegraph"])
-            if "bargraph" in chart:
+            if "bargraph" in chart and chart["bargraph"]:
                 graphBytes["bargraph"] = get_encoded(chart["bargraph"])
-
+                print(chart["heatmap"] == chart["bargraph"])
+            
             graphs.append(graphBytes)
     else:
         graphs = None
@@ -80,7 +82,7 @@ def photon2_tab3():
             'baseline_end': -0.2,
             'event_dur': 2,
             'event_sort_analysis_win': "0,5",
-            'opto_blank_frame': "false",
+            'opto_blank_frame': None,
             'flag_sort_rois': "true",
             'user_sort_method': 'max_value',
             'roi_sort_cond': 'plus',

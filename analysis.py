@@ -1,6 +1,6 @@
 from drive import upload_to_drive, delete_folder, get_contents_bytefile, get_contents_string
-from visualizer.data import S2PActivityProcessor, EventTicksProcessor, EventAnalysisProcessor
-from visualizer.plots import S2PActivityPlot, EventTicksPlot, EventAnalysisPlot
+from visualizer.data import ROITraceProcessor, WholeSessionProcessor, EventRelAnalysisProcessor
+from visualizer.plots import S2PROITracePlot, WholeSessionPlot, EventRelAnalysisPlot
 from abc import ABC, abstractmethod
 from io import BytesIO
 import base64
@@ -93,7 +93,7 @@ class Photon2Tab1(Photon2):
             self.tseries_start_end_split = self.request.form.get('tseries_start_end').split(",")
             self.tseries_start_end = [int(item) for item in self.tseries_start_end_split]
 
-        self.show_labels = False if self.request.form.get('show_labels') == "false" else True
+        self.show_labels = True if self.request.form.get('show_labels') else False
         self.color_all_rois = True
 
     def get_contents(self):
@@ -105,10 +105,10 @@ class Photon2Tab1(Photon2):
         self.contents["stat"] = get_contents_bytefile(self.file_ids_dict["stat"])
 
     def generate_plots(self):
-        data_processor = S2PActivityProcessor(self.tseries_start_end, self.show_labels, self.color_all_rois, self.rois_to_plot)
+        data_processor = ROITraceProcessor(self.tseries_start_end, self.show_labels, self.color_all_rois, self.rois_to_plot)
         data_processor.setup_roi_data(self.contents["f"], self.contents["fneu"], self.contents["iscell"], self.contents["ops"], self.contents["stat"])
 
-        data_plotter = S2PActivityPlot(data_processor)
+        data_plotter = S2PROITracePlot(data_processor)
         
         chart_contour = data_plotter.generate_contour_plot(package="matplotlib")
 
@@ -143,7 +143,7 @@ class Photon2Tab2(Photon2):
         }
 
         self.fs = int(self.request.form.get('fs'))
-        self.opto_blank_frame = False if self.request.form.get('opto_blank_frame') == "false" else True
+        self.opto_blank_frame = True if self.request.form.get('opto_blank_frame') else False
         self.num_rois = "all" if self.request.form.get('num_rois') == "all" else int(self.request.form.get('num_rois'))
         self.selected_conditions = None if self.request.form.get('selected_conditions') == "None" else self.request.form.get('selected_conditions')
         self.flag_normalization = self.request.form.get('flag_normalization')
@@ -155,10 +155,10 @@ class Photon2Tab2(Photon2):
         self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
 
     def generate_plots(self):
-        data_processor = EventTicksProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["events"])
+        data_processor = WholeSessionProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["events"])
         data_processor.generate_all_data()
 
-        data_plotter = EventTicksPlot(data_processor)
+        data_plotter = WholeSessionPlot(data_processor)
         fig = data_plotter.generate_session_plot()
         graphJSON = fig.to_json()
 
@@ -213,12 +213,12 @@ class Photon2Tab3(Photon2):
             'baseline_end': float(self.request.form.get('baseline_end')),
             'event_dur': int(self.request.form.get('event_dur')),
             'event_sort_analysis_win': [int(item) for item in self.request.form.get('event_sort_analysis_win').split(",")],
-            'opto_blank_frame': False if self.fparams["opto_blank_frame"] == "false" else True,
-            'flag_sort_rois': False if self.fparams["flag_sort_rois"] == "false" else True,
+            'opto_blank_frame': True if self.fparams["opto_blank_frame"] else False,
+            'flag_sort_rois': True if self.fparams["flag_sort_rois"] else False,
             'user_sort_method': self.request.form.get('user_sort_method'),
             'roi_sort_cond': self.request.form.get('roi_sort_cond'),
-            'flag_roi_trial_avg_errbar': False if self.fparams["flag_roi_trial_avg_errbar"] == "false" else True,
-            'flag_trial_avg_errbar': False if self.fparams["flag_trial_avg_errbar"] == "false" else True,
+            'flag_roi_trial_avg_errbar': True if self.fparams["flag_roi_trial_avg_errbar"] else False,
+            'flag_trial_avg_errbar': True if self.fparams["flag_trial_avg_errbar"] else False,
             'interesting_rois': [int(item) for item in self.request.form.get('interesting_rois').split(",")],
             'data_trial_resolved_key': self.request.form.get('data_trial_resolved_key'),
             'data_trial_avg_key': self.request.form.get('data_trial_avg_key'),
@@ -233,11 +233,11 @@ class Photon2Tab3(Photon2):
         self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
 
     def generate_plots(self):
-        data_processor = EventAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["events"])
+        data_processor = EventRelAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["events"])
         data_processor.generate_all_data()
         num_rois = data_processor.get_num_rois()
 
-        data_plotter = EventAnalysisPlot(data_processor)
+        data_plotter = EventRelAnalysisPlot(data_processor)
         figs = data_plotter.generate_roi_plots()
 
         return figs, num_rois
@@ -245,8 +245,8 @@ class Photon2Tab3(Photon2):
     def generate_full_output(self):
         self.generate_params()
         self.get_contents()
-        jsons, num_rois = self.generate_plots()
+        figs, num_rois = self.generate_plots()
 
         delete_folder(self.folder_id)
 
-        return self.fparams, jsons, num_rois
+        return self.fparams, figs, num_rois
