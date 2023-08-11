@@ -68,7 +68,6 @@ def photon2_tab3():
                 graphBytes["linegraph"] = get_encoded(chart["linegraph"])
             if "bargraph" in chart and chart["bargraph"]:
                 graphBytes["bargraph"] = get_encoded(chart["bargraph"])
-                print(chart["heatmap"] == chart["bargraph"])
             
             graphs.append(graphBytes)
     else:

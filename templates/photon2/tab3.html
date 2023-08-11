@@ -89,11 +89,6 @@
                         <input type="number" id="event_dur" name="event_dur" value="{{ fparams['event_dur'] }}"
                             required><br><br>
 
-                        <label for="event_sort_analysis_win">Event Sort Analysis Window:</label>
-                        <p class="description">Time window (in seconds); Format: 1,2</p>
-                        <input type="text" id="event_sort_analysis_win" name="event_sort_analysis_win"
-                            value="{{ fparams['event_sort_analysis_win'] }}" required><br><br>
-
                         <label for="opto_blank_frame">Opto Blank Frame:</label>
                         <p class="description">If PMTs were blanked during stim, set stim times to None
                         </p>
@@ -108,6 +103,11 @@
                         <label for="flag_sort_rois">Sort ROIs:</label>
                         <p class="description">If true, ROIs are sorted by activity</p>
                         <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois" {% if fparams['flag_sort_rois']  %}checked{% endif %}><br><br>
+
+                        <label for="event_sort_analysis_win">Event Sort Analysis Window:</label>
+                        <p class="description">Time window (in seconds); Format: 1,2</p>
+                        <input type="text" id="event_sort_analysis_win" name="event_sort_analysis_win"
+                            value="{{ fparams['event_sort_analysis_win'] }}" required><br><br>
 
                         <label for="user_sort_method">User Sort Method:</label>
                         <p class="description">peak_time or max_value</p>

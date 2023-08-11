@@ -145,8 +145,14 @@ class Photon2Tab2(Photon2):
         self.fs = int(self.request.form.get('fs'))
         self.opto_blank_frame = True if self.request.form.get('opto_blank_frame') else False
         self.num_rois = "all" if self.request.form.get('num_rois') == "all" else int(self.request.form.get('num_rois'))
-        self.selected_conditions = None if self.request.form.get('selected_conditions') == "None" else self.request.form.get('selected_conditions')
         self.flag_normalization = self.request.form.get('flag_normalization')
+
+        if self.request.form.get('selected_conditions') == "None":
+            self.selected_conditions = None
+        elif len(self.request.form.get('selected_conditions').split(",")) > 1:
+            self.selected_conditions = self.request.form.get('selected_conditions').split(",")
+        else:
+            self.selected_conditions = [self.request.form.get('selected_conditions')]
 
     def get_contents(self):
         self.contents = {}
@@ -201,9 +207,10 @@ class Photon2Tab3(Photon2):
 
         if self.request.form.get('selected_conditions') == "None":
             selected_conditions = None
+        elif len(self.request.form.get('selected_conditions').split(",")) > 1:
+            selected_conditions = self.request.form.get('selected_conditions').split(",")
         else:
-            selected_conditions_split = self.request.form.get('selected_conditions').split(",")
-            selected_conditions = [int(item) for item in selected_conditions_split]
+            selected_conditions = [self.request.form.get('selected_conditions')]
 
         self.processor_fparams = {
             'fs': int(self.request.form.get('fs')),
