@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from analysis import upload_inputted_files, get_encoded, Photon2Tab1, Photon2Tab2, Photon2Tab3
+from analysis import upload_inputted_files, get_encoded, Photon2Tab1, Photon2Tab2, Photon2Tab3, Photon2Tab4
 
 app = Flask(__name__)
 
@@ -102,6 +102,38 @@ def photon2_tab3():
             fparams['ylabel'] = 'Activity'
 
     return render_template('photon2/tab3.html', graphs=graphs, fparams=fparams, num_rois=num_rois)
+
+@app.route('/photon2/tab4', methods=['GET', 'POST'])
+def photon2_tab4():
+    if request.method == "POST":
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "events"], ".csv")
+        data_generator = Photon2Tab4(request, file_ids_dict, folder_id)
+        fparams, jsons = data_generator.generate_full_output()
+
+        graphs = []
+        for json in jsons:
+            graphs.append(get_encoded(json))
+
+    else:
+        graphs = None
+        fparams = {
+            "fs": 5,
+            'trial_start_end': "-2,8",
+            'baseline_end': -0.2,
+            "event_sort_analysis_win": "0,5",
+            "pca_num_pc_method": 0,
+            "max_n_clusters": 10,
+            "possible_n_nearest_neighbors": "3,5,10",
+            "selected_conditions": "None",
+            "flag_plot_reward_line": None,
+            "second_event_seconds": 1,
+            "heatmap_cmap_scaling": 1,
+            "group_data": None,
+            "group_data_conditions": 'cs_plus,cs_minus',
+            "sortwindow": "15,100"
+        }
+
+    return render_template('photon2/tab4.html', graphs=graphs, fparams=fparams)
 
 if __name__ == '__main__':
     app.run(debug=True)
