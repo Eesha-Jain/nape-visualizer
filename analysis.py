@@ -214,7 +214,7 @@ class Photon2Tab3(Photon2):
         self.processor_fparams = {
             'fs': int(self.request.form.get('fs')),
             'selected_conditions': none_or_stringarray_input(self.request.form.get('selected_conditions')),
-            'trial_start_end': none_or_intarray_input('trial_start_end'),
+            'trial_start_end': [int(item) for item in self.request.form.get('trial_start_end').split(",")],
             'flag_normalization': none_or_input(self.request.form.get('flag_normalization')),
             'baseline_end': float(self.request.form.get('baseline_end')),
             'event_dur': int(self.request.form.get('event_dur')),
@@ -280,19 +280,19 @@ class Photon2Tab4(Photon2):
         }
 
         self.fs = int(self.request.form.get('fs'))
-        self.trial_start_end = none_or_intarray_input(self.request.form.get('trial_start_end'))
+        self.trial_start_end = [int(item) for item in self.request.form.get('trial_start_end').split(",")]
         self.baseline_end = float(self.request.form.get('baseline_end'))
         self.event_sort_analysis_win = none_or_intarray_input(self.request.form.get('event_sort_analysis_win'))
         self.pca_num_pc_method = int(self.request.form.get('pca_num_pc_method'))
         self.max_n_clusters = int(self.request.form.get('max_n_clusters'))
-        self.possible_n_nearest_neighbors = np.array([int(item) for item in self.request.form.get('possible_n_nearest_neighbors').split(",")])
+        self.possible_n_nearest_neighbors = np.array(none_or_intarray_input(self.request.form.get('possible_n_nearest_neighbors')))
         self.selected_conditions = none_or_stringarray_input(self.request.form.get('selected_conditions'))
         self.flag_plot_reward_line = none_or_input(self.request.form.get('flag_plot_reward_line'))
         self.second_event_seconds = int(self.request.form.get('second_event_seconds'))
         self.heatmap_cmap_scaling = int(self.request.form.get('heatmap_cmap_scaling'))
         self.group_data = none_or_input(self.request.form.get('group_data'))
         self.group_data_conditions = none_or_stringarray_input(self.request.form.get('group_data_conditions'))
-        self.sortwindow = none_or_intarray_input(self.request.form.get('sortwindow').split(","))
+        self.sortwindow = none_or_intarray_input(self.request.form.get('sortwindow'))
 
     def get_contents(self):
         self.contents = {}
@@ -306,13 +306,13 @@ class Photon2Tab4(Photon2):
 
         data_plotter = EventClusterPlot(data_processor)
 
-        return [data_plotter.generate_heatmap_zscore(), data_plotter.generate_scree_plot(), data_plotter.generate_pca_plot(), data_plotter.generate_cluster_condition_plots(), data_plotter.generate_fluorescent_graph(), data_plotter.generate_cluster_plot()]
+        return data_plotter.generate_scree_plot(package="plotly").to_json(), [data_plotter.generate_heatmap_zscore(), data_plotter.generate_pca_plot(), data_plotter.generate_cluster_condition_plots(), data_plotter.generate_fluorescent_graph(), data_plotter.generate_cluster_plot()]
     
     def generate_full_output(self):
         self.generate_params()
         self.get_contents()
-        jsons = self.generate_plots()
+        graph1JSON, jsons = self.generate_plots()
 
         delete_folder(self.folder_id)
 
-        return self.fparams, jsons
+        return self.fparams, graph1JSON, jsons

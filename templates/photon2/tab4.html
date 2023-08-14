@@ -125,6 +125,11 @@
                 <div class="flex"><input type="submit" value="Submit" /></div>
             </div>
         </form>
+        {% if graph1JSON %}
+            <div class="box" style="padding: 0;">
+                <div id="chart1-container" style="margin-left: 5px;"></div>
+            </div>
+        {% endif %}
         {% if graphs %}
             {% for graph in graphs %}
             <div class="box">
@@ -134,6 +139,14 @@
         {% endif %}
     </div>
     <br />
+
+    <script type="text/javascript">
+        var graph1JSON = {{ graph1JSON | safe }};
+
+        if (graph1JSON != NaN) {
+            Plotly.react('chart1-container', graph1JSON.data, graph1JSON.layout, { displayModeBar: true });
+        }
+    </script>
 </body>
 
 </html>

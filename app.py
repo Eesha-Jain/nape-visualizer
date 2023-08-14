@@ -108,7 +108,7 @@ def photon2_tab4():
     if request.method == "POST":
         folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "events"], ".csv")
         data_generator = Photon2Tab4(request, file_ids_dict, folder_id)
-        fparams, jsons = data_generator.generate_full_output()
+        fparams, graph1JSON, jsons = data_generator.generate_full_output()
 
         graphs = []
         for json in jsons:
@@ -116,6 +116,7 @@ def photon2_tab4():
 
     else:
         graphs = None
+        graph1JSON = None
         fparams = {
             "fs": 5,
             'trial_start_end': "-2,8",
@@ -133,7 +134,7 @@ def photon2_tab4():
             "sortwindow": "15,100"
         }
 
-    return render_template('photon2/tab4.html', graphs=graphs, fparams=fparams)
+    return render_template('photon2/tab4.html', graph1JSON=graph1JSON, graphs=graphs, fparams=fparams)
 
 if __name__ == '__main__':
     app.run(debug=True)
