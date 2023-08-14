@@ -11,7 +11,7 @@ def photon():
 @app.route('/photon2/tab1', methods=['GET', 'POST'])
 def photon2_tab1():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["f", "fneu", "iscell", "ops", "spks", "stat"], ".npy")
+        folder_id, file_ids_dict = upload_inputted_files(request, ["ff", "fneu", "iscell", "ops", "spks", "stat"], ".npy")
         data_generator = Photon2Tab1(request, file_ids_dict, folder_id)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -33,7 +33,7 @@ def photon2_tab1():
 @app.route('/photon2/tab2', methods=['GET', 'POST'])
 def photon2_tab2():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "events"], ".csv")
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
         data_generator = Photon2Tab2(request, file_ids_dict, folder_id)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -53,7 +53,7 @@ def photon2_tab2():
 @app.route('/photon2/tab3', methods=['GET', 'POST'])
 def photon2_tab3():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "events"], ".csv")
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
         data_generator = Photon2Tab3(request, file_ids_dict, folder_id)
         fparams, matCharts, num_rois = data_generator.generate_full_output()
 
@@ -106,7 +106,7 @@ def photon2_tab3():
 @app.route('/photon2/tab4', methods=['GET', 'POST'])
 def photon2_tab4():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "events"], ".csv")
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
         data_generator = Photon2Tab4(request, file_ids_dict, folder_id)
         fparams, graph1JSON, jsons = data_generator.generate_full_output()
 

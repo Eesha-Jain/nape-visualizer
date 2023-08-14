@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool | Photon2 | Tab 4</title>
+    <title>NAPE Visualizer | Event Clustering</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -19,6 +19,7 @@
 
 <body>
     <div class="navbar">
+        <a href="/" class="pagetitle">Nape Visualizer</a>
         <a href="/">Photometry</a>
         <div class="dropdown">
             <button class="dropbtn">2-Photon
@@ -33,7 +34,8 @@
         </div>
     </div>
 
-    <h1>NAPE Visualization Tool</h1>
+    <h1>NAPE Visualizer</h1>
+    <h2>Event Clustering</h2>
 
     <div class="container larger-grid">
         <form action="{{ url_for('photon2_tab4') }}" method="post" enctype="multipart/form-data" class="box">
@@ -56,18 +58,17 @@
 
                 <hr />
 
-                <label for="fs">Sampling Rate:</label><br>
+                <label for="fs">Sampling Rate:</label>
+                <p class="description">Sampling rate of the activity data</p>
                 <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
 
                 <label for="trial_start_end">Trial Start and End:</label>
-                <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format:
-                    1,2)</p>
+                <p class="description">In seconds. Make a list in the following format: starttime,endtime</p>
                 <input type="text" id="trial_start_end" name="trial_start_end" value="{{ fparams['trial_start_end'] }}"
                     required><br><br>
 
                 <label for="baseline_end">Baseline End:</label>
-                <p class="description">Baseline epoch end time (in seconds) for performing baseline
-                    normalization</p>
+                <p class="description">Baseline epoch end time (in seconds) for performing baseline normalization</p>
                 <input type="text" id="baseline_end" name="baseline_end" value="{{ fparams['baseline_end'] }}"
                     required><br><br>
 
@@ -76,49 +77,49 @@
                 <input type="text" id="event_sort_analysis_win" name="event_sort_analysis_win"
                     value="{{ fparams['event_sort_analysis_win'] }}" required><br><br>
 
-                <label for="pca_num_pc_method">pca_num_pc_method:</label><br>
+                <label for="pca_num_pc_method">PCA Number of PC Method:</label>
+                <p class="description">0 for bend in scree plot, 1 for num PCs that account for 90% variance</p>
                 <input type="number" id="pca_num_pc_method" name="pca_num_pc_method"
                     value="{{ fparams['pca_num_pc_method'] }}" required><br><br>
 
-                <label for="max_n_clusters">max_n_clusters:</label><br>
+                <label for="max_n_clusters">Maximum Number of Clusters:</label>
+                <p class="description">Should be based on the number of functional neuron groups you expect + ~3</p>
                 <input type="number" id="max_n_clusters" name="max_n_clusters" value="{{ fparams['max_n_clusters'] }}"
                     required><br><br>
 
-                <label for="possible_n_nearest_neighbors">possible_n_nearest_neighbors:</label><br>
+                <label for="possible_n_nearest_neighbors">Possible N Nearest Neighbors:</label>
+                <p class="description">Provides an idea of where the algorithm should focus</p>
                 <input type="text" id="possible_n_nearest_neighbors" name="possible_n_nearest_neighbors"
                     value="{{ fparams['possible_n_nearest_neighbors'] }}" required><br><br>
 
                 <label for="selected_conditions">Selected Conditions:</label>
-                <p class="description">Set to "None" if want to include all conditions from behavior data,
-                    otherwise make it a list (Format: item,item2)</p>
+                <p class="description">Set to "None" if want to include all conditions from behavior data, otherwise make it a list (Format: item,item2)</p>
                 <input type="text" id="selected_conditions" name="selected_conditions"
                     value="{{ fparams['selected_conditions'] }}" required><br><br>
 
-                <label for="flag_plot_reward_line">flag_plot_reward_line:</label>
-                <p class="description">flag_plot_reward_line</p>
+                <label for="flag_plot_reward_line">Plot Reward Line:</label>
+                <p class="description">If there's a second event that happens after the main event, it can be indicated if set to True</p>
                 <input type="checkbox" id="flag_plot_reward_line" name="flag_plot_reward_line" {% if
                     fparams['flag_plot_reward_line'] %}checked{% endif %}><br><br>
 
-                <label for="second_event_seconds">second_event_seconds:</label><br>
+                <label for="second_event_seconds">Second Event Seconds:</label><br>
                 <input type="number" id="second_event_seconds" name="second_event_seconds"
                     value="{{ fparams['second_event_seconds'] }}" required><br><br>
 
-                <label for="heatmap_cmap_scaling">heatmap_cmap_scaling:</label><br>
+                <label for="heatmap_cmap_scaling">Heatmap Cmap Scaling:</label><br>
                 <input type="number" id="heatmap_cmap_scaling" name="heatmap_cmap_scaling"
                     value="{{ fparams['heatmap_cmap_scaling'] }}" required><br><br>
 
-                <label for="group_data">group_data:</label>
-                <p class="description">group_data</p>
+                <label for="group_data">Group Data:</label>
+                <p class="description">True if data loaded already has data from different conditions concatenated together. Set False if data directly from suite2p or sima/napeca preprocessing</p>
                 <input type="checkbox" id="group_data" name="group_data" {% if fparams['group_data'] %}checked{% endif
                     %}><br><br>
 
-                <label for="group_data_conditions">group_data_conditions:</label>
-                <p class="description">group_data_conditions</p>
+                <label for="group_data_conditions">Group Data Conditions:</label><br>
                 <input type="text" id="group_data_conditions" name="group_data_conditions"
                     value="{{ fparams['group_data_conditions'] }}" required><br><br>
 
-                <label for="sortwindow">sortwindow:</label>
-                <p class="description">sortwindow</p>
+                <label for="sortwindow">Sort Window:</label><br>
                 <input type="text" id="sortwindow" name="sortwindow" value="{{ fparams['sortwindow'] }}"
                     required><br><br>
                 

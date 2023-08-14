@@ -34,6 +34,11 @@ def get_encoded(chart):
     chart.savefig(buf, format="png", bbox_inches='tight', pad_inches=0)
     return base64.b64encode(buf.getbuffer()).decode("ascii")
 
+def contains_name(files_dict, name, file_extension):
+    for key in files_dict.keys():
+        if name in key and file_extension in key:
+            return files_dict[key]
+
 def upload_inputted_files(request, file_names, file_extension):
     files = []
     try:
@@ -56,7 +61,7 @@ def upload_inputted_files(request, file_names, file_extension):
                 files_dict[filename[len(filename) - 1]] = file
         
         for i in range(len(file_names)):
-            file = files_dict[file_names[i] + file_extension]
+            file = contains_name(files_dict, file_names[i], file_extension)
             files.append(file)
     
     #Upload files to Google Drive
@@ -110,7 +115,7 @@ class Photon2Tab1(Photon2):
 
     def get_contents(self):
         self.contents = {}
-        self.contents["f"] = get_contents_bytefile(self.file_ids_dict["f"])
+        self.contents["ff"] = get_contents_bytefile(self.file_ids_dict["ff"])
         self.contents["fneu"] = get_contents_bytefile(self.file_ids_dict["fneu"])
         self.contents["iscell"] = get_contents_bytefile(self.file_ids_dict["iscell"])
         self.contents["ops"] = get_contents_bytefile(self.file_ids_dict["ops"])
@@ -118,7 +123,7 @@ class Photon2Tab1(Photon2):
 
     def generate_plots(self):
         data_processor = ROITraceProcessor(self.tseries_start_end, self.show_labels, self.color_all_rois, self.rois_to_plot)
-        data_processor.setup_roi_data(self.contents["f"], self.contents["fneu"], self.contents["iscell"], self.contents["ops"], self.contents["stat"])
+        data_processor.setup_roi_data(self.contents["ff"], self.contents["fneu"], self.contents["iscell"], self.contents["ops"], self.contents["stat"])
 
         data_plotter = S2PROITracePlot(data_processor)
         
@@ -164,10 +169,10 @@ class Photon2Tab2(Photon2):
         self.contents = {}
 
         self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
 
     def generate_plots(self):
-        data_processor = WholeSessionProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["events"])
+        data_processor = WholeSessionProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["event"])
         data_processor.generate_all_data()
 
         data_plotter = WholeSessionPlot(data_processor)
@@ -236,10 +241,10 @@ class Photon2Tab3(Photon2):
         self.contents = {}
 
         self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
 
     def generate_plots(self):
-        data_processor = EventRelAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["events"])
+        data_processor = EventRelAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["event"])
         data_processor.generate_all_data()
         num_rois = data_processor.get_num_rois()
 
@@ -298,10 +303,10 @@ class Photon2Tab4(Photon2):
         self.contents = {}
 
         self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["events"] = get_contents_string(self.file_ids_dict["events"])
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
 
     def generate_plots(self):
-        data_processor = EventClusterProcessor(self.contents["signals"], self.contents["events"], self.fs, self.trial_start_end, self.baseline_end, self.event_sort_analysis_win, self.pca_num_pc_method, self.max_n_clusters, self.possible_n_nearest_neighbors, self.selected_conditions, self.flag_plot_reward_line, self.second_event_seconds, self.heatmap_cmap_scaling, self.group_data, self.group_data_conditions, self.sortwindow)
+        data_processor = EventClusterProcessor(self.contents["signals"], self.contents["event"], self.fs, self.trial_start_end, self.baseline_end, self.event_sort_analysis_win, self.pca_num_pc_method, self.max_n_clusters, self.possible_n_nearest_neighbors, self.selected_conditions, self.flag_plot_reward_line, self.second_event_seconds, self.heatmap_cmap_scaling, self.group_data, self.group_data_conditions, self.sortwindow)
         data_processor.generate_all_data()
 
         data_plotter = EventClusterPlot(data_processor)

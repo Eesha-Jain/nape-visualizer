@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool | Photon2 | Tab 3</title>
+    <title>NAPE Visualizer | Event Analysis</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -19,6 +19,7 @@
 
 <body>
     <div class="navbar">
+        <a href="/" class="pagetitle">Nape Visualizer</a>
         <a href="/">Photometry</a>
         <div class="dropdown">
             <button class="dropbtn">2-Photon
@@ -33,7 +34,8 @@
         </div>
     </div>
 
-    <h1>NAPE Visualization Tool</h1>
+    <h1>NAPE Visualizer</h1>
+    <h2>Event Analysis</h2>
 
     <div class="container single-grid">
         <form action="{{ url_for('photon2_tab3') }}" method="post" enctype="multipart/form-data" class="box">
@@ -68,8 +70,7 @@
                             value="{{ fparams['selected_conditions'] }}" required><br><br>
 
                         <label for="trial_start_end">Trial Start and End:</label>
-                        <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format:
-                            1,2)</p>
+                        <p class="description">In seconds. Input a list (Format: starttime,endtime)</p>
                         <input type="text" id="trial_start_end" name="trial_start_end"
                             value="{{ fparams['trial_start_end'] }}" required><br><br>
 

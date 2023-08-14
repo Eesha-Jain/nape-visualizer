@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool | Photon2 | Tab 1</title>
+    <title>NAPE Visualizer | Suite2P ROI Trace</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -19,6 +19,7 @@
 
 <body>
     <div class="navbar">
+        <a href="/" class="pagetitle">Nape Visualizer</a>
         <a href="/">Photometry</a>
         <div class="dropdown">
             <button class="dropbtn">2-Photon
@@ -33,15 +34,16 @@
         </div>
     </div>
 
-    <h1>NAPE Visualization Tool</h1>
+    <h1>NAPE Visualizer</h1>
+    <h2>Suite2P ROI Trace</h2>
 
     <div class="container larger-grid">
         <form action="{{ url_for('photon2_tab1') }}" method="post" enctype="multipart/form-data" class="box box-inputs">
             <div style="margin: 10px;">
                 <div class="row">
                     <div>
-                        <label for="f">Upload f.npy:</label><br>
-                        <input type="file" id="f" name="f"><br><br>
+                        <label for="ff">Upload ff.npy:</label><br>
+                        <input type="file" id="ff" name="ff"><br><br>
 
                         <label for="fneu">Upload fneu.npy</label><br>
                         <input type="file" id="fneu" name="fneu"><br><br>
@@ -70,7 +72,7 @@
                 <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{% endif %}><br><br>
 
                 <label for="tseries_start_end">T-series Start to End:</label>
-                <p class="description">Set to "None" will plot the whole session</p>
+                <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format: 1,2)</p>
                 <input type="text" id="tseries_start_end" name="tseries_start_end"
                     value="{{ fparams['tseries_start_end'] }}" required><br><br>
 

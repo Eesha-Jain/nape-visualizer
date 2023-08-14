@@ -27,6 +27,15 @@ h1 {
     margin-bottom: 5px;
 }
 
+h2 {
+    text-align: center;
+    font-size: 25px;
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
 .row {
     display: grid;
     grid-template-columns: 45% auto;

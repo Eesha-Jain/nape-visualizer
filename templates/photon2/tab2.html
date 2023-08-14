@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>NAPE Visualization Tool | Photon2 | Tab 2</title>
+    <title>NAPE Visualizer | Whole Session</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -19,6 +19,7 @@
 
 <body>
     <div class="navbar">
+        <a href="/" class="pagetitle">Nape Visualizer</a>
         <a href="/">Photometry</a>
         <div class="dropdown">
             <button class="dropbtn">2-Photon
@@ -33,7 +34,8 @@
         </div>
     </div>
 
-    <h1>NAPE Visualization Tool</h1>
+    <h1>NAPE Visualizer</h1>
+    <h2>Whole Session</h2>
 
     <div class="container larger-grid">
         <form action="{{ url_for('photon2_tab2') }}" method="post" enctype="multipart/form-data" class="box">

@@ -62,3 +62,8 @@
 .active {
     text-decoration: underline !important;
 }
+
+.pagetitle {
+    font-weight: bold;
+    background-color: var(--primary) !important;
+}
