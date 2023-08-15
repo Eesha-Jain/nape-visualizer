@@ -1,6 +1,4 @@
-import os
 import uuid
-from flask import Flask, render_template, request
 from google.oauth2 import service_account
 import google.auth.transport.requests as google_auth_transport
 from googleapiclient.discovery import build
@@ -8,6 +6,8 @@ from googleapiclient.http import MediaInMemoryUpload, MediaIoBaseDownload
 import io
 from werkzeug.datastructures import FileStorage
 from pathlib import Path
+import pickle
+import numpy as np
 
 # Google OAuth2 credentials
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
@@ -113,14 +113,16 @@ def get_contents_bytefile(file_id):
     file_content = get_contents(file_id)
     return io.BytesIO(file_content)
 
-def get_contents_string(file_id):
+def get_contents_string(file_id, file_extension):
     file_obj = get_file_by_id(file_id)
-
     file_obj.seek(0)
-    file_content = file_obj.read()
-    csv_string = file_content.decode('utf-8')
 
-    return io.StringIO(csv_string)
+    if file_extension == ".csv":
+        file_content = file_obj.read()
+        csv_string = file_content.decode('utf-8')
+
+        return io.StringIO(csv_string)
+    return file_obj
 
 def delete_folder(folder_id):
     drive_service = create_drive_service()

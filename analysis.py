@@ -36,7 +36,7 @@ def get_encoded(chart):
 
 def contains_name(files_dict, name, file_extension):
     for key in files_dict.keys():
-        if name in key and file_extension in key:
+        if name in key and any(ext in key for ext in file_extension):
             return files_dict[key]
 
 def upload_inputted_files(request, file_names, file_extension):
@@ -156,7 +156,8 @@ class Photon2Tab2(Photon2):
             "opto_blank_frame": self.request.form.get('opto_blank_frame'),
             "num_rois": self.request.form.get('num_rois'), 
             "selected_conditions": self.request.form.get('selected_conditions'),
-            "flag_normalization": self.request.form.get('flag_normalization')
+            "flag_normalization": self.request.form.get('flag_normalization'),
+            "file_extension": self.request.form.get("file_extension")
         }
 
         self.fs = int(self.request.form.get('fs'))
@@ -164,15 +165,16 @@ class Photon2Tab2(Photon2):
         self.num_rois = "all" if self.request.form.get('num_rois') == "all" else int(self.request.form.get('num_rois'))
         self.flag_normalization = self.request.form.get('flag_normalization')
         self.selected_conditions = none_or_stringarray_input(self.request.form.get('selected_conditions'))
+        self.file_extension = self.request.form.get("file_extension").split(",") if len(self.request.form.get("file_extension").split(",")) > 1 else [self.request.form.get("file_extension")]
 
     def get_contents(self):
         self.contents = {}
 
-        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
+        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"], self.file_extension[0])
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"], self.file_extension[1])
 
     def generate_plots(self):
-        data_processor = WholeSessionProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["event"])
+        data_processor = WholeSessionProcessor(self.fs, self.opto_blank_frame, self.num_rois, self.selected_conditions, self.flag_normalization, self.contents["signals"], self.contents["event"], file_extension=self.file_extension)
         data_processor.generate_all_data()
 
         data_plotter = WholeSessionPlot(data_processor)
@@ -213,7 +215,8 @@ class Photon2Tab3(Photon2):
             'data_trial_resolved_key': self.request.form.get('data_trial_resolved_key'),
             'data_trial_avg_key': self.request.form.get('data_trial_avg_key'),
             'cmap_': self.request.form.get('cmap_'),
-            'ylabel': self.request.form.get('ylabel')
+            'ylabel': self.request.form.get('ylabel'),
+            "file_extension": self.request.form.get("file_extension")
         }
 
         self.processor_fparams = {
@@ -234,17 +237,18 @@ class Photon2Tab3(Photon2):
             'data_trial_resolved_key': self.request.form.get('data_trial_resolved_key'),
             'data_trial_avg_key': self.request.form.get('data_trial_avg_key'),
             'cmap_': none_or_input(self.request.form.get('cmap_')),
-            'ylabel': self.request.form.get('ylabel')
+            'ylabel': self.request.form.get('ylabel'),
+            'file_extension': self.request.form.get("file_extension").split(",") if len(self.request.form.get("file_extension").split(",")) > 1 else [self.request.form.get("file_extension")]
         }
 
     def get_contents(self):
         self.contents = {}
 
-        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
+        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"], self.processor_fparams["file_extension"])
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"], self.processor_fparams["file_extension"])
 
     def generate_plots(self):
-        data_processor = EventRelAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["event"])
+        data_processor = EventRelAnalysisProcessor(self.processor_fparams, self.contents["signals"], self.contents["event"], self.processor_fparams["file_extension"])
         data_processor.generate_all_data()
         num_rois = data_processor.get_num_rois()
 
@@ -282,6 +286,7 @@ class Photon2Tab4(Photon2):
             "group_data": self.request.form.get('group_data'),
             "group_data_conditions": self.request.form.get('group_data_conditions'),
             "sortwindow": self.request.form.get('sortwindow'),
+            "file_extension": self.request.form.get("file_extension")
         }
 
         self.fs = int(self.request.form.get('fs'))
@@ -298,15 +303,16 @@ class Photon2Tab4(Photon2):
         self.group_data = none_or_input(self.request.form.get('group_data'))
         self.group_data_conditions = none_or_stringarray_input(self.request.form.get('group_data_conditions'))
         self.sortwindow = none_or_intarray_input(self.request.form.get('sortwindow'))
+        self.file_extension = self.request.form.get("file_extension").split(",") if len(self.request.form.get("file_extension").split(",")) > 1 else [self.request.form.get("file_extension")]
 
     def get_contents(self):
         self.contents = {}
 
-        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"])
-        self.contents["event"] = get_contents_string(self.file_ids_dict["event"])
+        self.contents["signals"] = get_contents_string(self.file_ids_dict["signals"], self.file_extension)
+        self.contents["event"] = get_contents_string(self.file_ids_dict["event"], self.file_extension)
 
     def generate_plots(self):
-        data_processor = EventClusterProcessor(self.contents["signals"], self.contents["event"], self.fs, self.trial_start_end, self.baseline_end, self.event_sort_analysis_win, self.pca_num_pc_method, self.max_n_clusters, self.possible_n_nearest_neighbors, self.selected_conditions, self.flag_plot_reward_line, self.second_event_seconds, self.heatmap_cmap_scaling, self.group_data, self.group_data_conditions, self.sortwindow)
+        data_processor = EventClusterProcessor(self.contents["signals"], self.contents["event"], self.fs, self.trial_start_end, self.baseline_end, self.event_sort_analysis_win, self.pca_num_pc_method, self.max_n_clusters, self.possible_n_nearest_neighbors, self.selected_conditions, self.flag_plot_reward_line, self.second_event_seconds, self.heatmap_cmap_scaling, self.group_data, self.group_data_conditions, self.sortwindow, self.file_extension)
         data_processor.generate_all_data()
 
         data_plotter = EventClusterPlot(data_processor)

@@ -40,17 +40,23 @@
     <div class="container single-grid">
         <form action="{{ url_for('photon2_tab3') }}" method="post" enctype="multipart/form-data" class="box">
             <div style="margin: 10px;">
+                <label for="file_extension">File Extension:</label>
+                <select name="file_extension" id="file_extension" selected="{{ fparams['file_extension'] }}" required>
+                    <option value=".csv,.csv">.csv</option>
+                    <option value=".npy,.pkl">.npy/.pkl</option>
+                </select><br><br>
+
                 <div class="row">
                     <div>
-                        <label for="signals">Upload signals.csv:</label><br>
+                        <label for="signals">Upload signals file:</label><br>
                         <input type="file" id="signals" name="signals"><br><br>
 
-                        <label for="events">Upload events.csv:</label><br>
-                        <input type="file" id="events" name="events"><br><br>
+                        <label for="event">Upload event file:</label><br>
+                        <input type="file" id="events" name="event"><br><br>
                     </div>
                     <div>
                         <label for="folder">OR Upload a folder containing all these files:</label>
-                        <p class="description">Files must be named exactly as the left</p>
+                        <p class="description">File name should contain "signals" or "event"</p>
                         <input name="folder" type="file" id="files" multiple="" directory="" webkitdirectory=""
                             mozdirectory=""><br><br>
                     </div>

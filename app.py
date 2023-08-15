@@ -33,7 +33,8 @@ def photon2_tab1():
 @app.route('/photon2/tab2', methods=['GET', 'POST'])
 def photon2_tab2():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
+        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
         data_generator = Photon2Tab2(request, file_ids_dict, folder_id)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -45,7 +46,8 @@ def photon2_tab2():
             "opto_blank_frame": "true",
             "num_rois": 10, 
             "selected_conditions": None,
-            "flag_normalization": "dff_perc"
+            "flag_normalization": "dff_perc",
+            "file_extension": ".csv"
         }
 
     return render_template('photon2/tab2.html', graphJSON=graphJSON, fparams=fparams)
@@ -53,7 +55,8 @@ def photon2_tab2():
 @app.route('/photon2/tab3', methods=['GET', 'POST'])
 def photon2_tab3():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
+        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
         data_generator = Photon2Tab3(request, file_ids_dict, folder_id)
         fparams, matCharts, num_rois = data_generator.generate_full_output()
 
@@ -106,7 +109,8 @@ def photon2_tab3():
 @app.route('/photon2/tab4', methods=['GET', 'POST'])
 def photon2_tab4():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], ".csv")
+        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
+        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
         data_generator = Photon2Tab4(request, file_ids_dict, folder_id)
         fparams, graph1JSON, jsons = data_generator.generate_full_output()
 
