@@ -100,17 +100,22 @@
                         <label for="opto_blank_frame">Opto Blank Frame:</label>
                         <p class="description">If PMTs were blanked during stim, set stim times to None
                         </p>
-                        <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
+                        <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if
+                            fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
 
                         <label for="data_trial_resolved_key">Trial Resolved Key:</label><br />
                         <input type="text" id="data_trial_resolved_key" name="data_trial_resolved_key"
                             value="{{ fparams['data_trial_resolved_key'] }}" required><br><br>
+
+                        <label for="ylabel">Y-Axis Label:</label><br />
+                        <input type="text" id="ylabel" name="ylabel" value="{{ fparams['ylabel'] }}" required><br><br>
                     </div>
 
                     <div>
                         <label for="flag_sort_rois">Sort ROIs:</label>
                         <p class="description">If true, ROIs are sorted by activity</p>
-                        <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois" {% if fparams['flag_sort_rois']  %}checked{% endif %}><br><br>
+                        <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois" {% if fparams['flag_sort_rois']
+                            %}checked{% endif %}><br><br>
 
                         <label for="event_sort_analysis_win">Event Sort Analysis Window:</label>
                         <p class="description">Time window (in seconds); Format: 1,2</p>
@@ -129,11 +134,13 @@
 
                         <label for="flag_roi_trial_avg_errbar">ROI Trial Average Error Bar</label>
                         <p class="description">Toggle to show error bar on roi- and trial-averaged traces</p>
-                        <input type="checkbox" id="flag_roi_trial_avg_errbar" name="flag_roi_trial_avg_errbar" {% if fparams['flag_roi_trial_avg_errbar']  %}checked{% endif %}><br><br>
+                        <input type="checkbox" id="flag_roi_trial_avg_errbar" name="flag_roi_trial_avg_errbar" {% if
+                            fparams['flag_roi_trial_avg_errbar'] %}checked{% endif %}><br><br>
 
                         <label for="flag_trial_avg_errbar">Trial Average Error Bar:</label>
                         <p class="description">Toggle to show error bars on the trial-avg traces</p>
-                        <input type="checkbox" id="flag_trial_avg_errbar" name="flag_trial_avg_errbar" {% if fparams['flag_trial_avg_errbar'] %}checked{% endif %}><br><br>
+                        <input type="checkbox" id="flag_trial_avg_errbar" name="flag_trial_avg_errbar" {% if
+                            fparams['flag_trial_avg_errbar'] %}checked{% endif %}><br><br>
 
                         <label for="interesting_rois">Interesting ROIs:</label>
                         <p class="description">Should be in a list in the following format: 1,2</p>
@@ -146,9 +153,6 @@
 
                         <label for="cmap_">CMAP:</label><br />
                         <input type="text" id="cmap_" name="cmap_" value="{{ fparams['cmap_'] }}" required><br><br>
-
-                        <label for="ylabel">Y-Axis Label:</label><br />
-                        <input type="text" id="ylabel" name="ylabel" value="{{ fparams['ylabel'] }}" required><br><br>
                     </div>
                 </div>
 
