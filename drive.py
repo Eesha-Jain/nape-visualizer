@@ -15,6 +15,7 @@ THIS_FOLDER = Path(__file__).parent.resolve()
 SERVICE_ACCOUNT_KEY_FILE = THIS_FOLDER / 'token.json'
 PARENT_FOLDER_ID = '1YPLWqRfp7-0xO_WikeDE9kZNWXCl2qO5'
 
+# Creates a connection to Google Drive using service account
 def create_drive_service():
     # Create a service account credentials object
     creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_KEY_FILE, scopes=SCOPES)
@@ -28,6 +29,7 @@ def create_drive_service():
 
     return drive_service
 
+# Upload files to Google Drive folder
 def upload_to_drive(files):
     # Get the credentials and create a Google Drive client
     drive_service = create_drive_service()
@@ -60,6 +62,7 @@ def upload_to_drive(files):
 
     return uploaded_files, folder_id
 
+# Create a subfolder in the given Google Drive location
 def create_folder():
     # Get the folder name from the HTML form
     folder_name = str(uuid.uuid1())
@@ -79,6 +82,7 @@ def create_folder():
 
     return folder_id_str
 
+# Get a specific file using Google Drive ID
 def get_file_by_id(file_id):
     drive_service = create_drive_service()
 
@@ -104,6 +108,7 @@ def get_file_by_id(file_id):
 
     return None
 
+# Extract the contents from the Google Drive files through ID
 def get_contents(file_id):
     file_obj = get_file_by_id(file_id)
     file_obj.seek(0)
@@ -124,6 +129,7 @@ def get_contents_string(file_id, file_extension):
         return io.StringIO(csv_string)
     return file_obj
 
+# Delete the created Google Drive subfolder
 def delete_folder(folder_id):
     drive_service = create_drive_service()
 

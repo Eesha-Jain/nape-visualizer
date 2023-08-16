@@ -1,45 +1,56 @@
 from flask import Flask, render_template, request
 from analysis import upload_inputted_files, get_encoded, Photon2Tab1, Photon2Tab2, Photon2Tab3, Photon2Tab4
 
+# Create a Flask application instance
 app = Flask(__name__)
 
+# Route for the main page
 @app.route('/', methods=['GET', 'POST'])
 def photon():
     graphJSON = None
     return render_template('photon.html', graphJSON=graphJSON)
 
+# Route and logic for the 'Tab 1' of Photon2
 @app.route('/photon2/tab1', methods=['GET', 'POST'])
 def photon2_tab1():
     if request.method == "POST":
-        folder_id, file_ids_dict = upload_inputted_files(request, ["ff", "fneu", "iscell", "ops", "spks", "stat"], ".npy")
-        data_generator = Photon2Tab1(request, file_ids_dict, folder_id)
+        # Upload inputted files and generate required data
+        file_names = ["ff", "fneu", "iscell", "ops", "stat"]
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, ".npy")
+        data_generator = Photon2Tab1(request, file_ids_dict, folder_id, file_names)
         fparams, jsons = data_generator.generate_full_output()
 
         graph1 = get_encoded(jsons[0])
         graph2JSON = jsons[1]
         graph3JSON = jsons[2]
     else:
+        # Set default values
         graph1 = ""
         graph2JSON = None
         graph3JSON = None
         fparams = {
             "tseries_start_end": "0, 10",
             "show_labels": "true",
-            "rois_to_plot": None
+            "rois_to_plot": None,
+            "color_all_rois": "true"
         }
 
     return render_template('photon2/tab1.html', graph1=graph1, graph2JSON=graph2JSON, graph3JSON=graph3JSON, fparams=fparams)
 
+# Route and logic for 'Tab 2' of Photon2
 @app.route('/photon2/tab2', methods=['GET', 'POST'])
 def photon2_tab2():
     if request.method == "POST":
+        # Upload inputted files and generate required data
+        file_names = ["signals", "event"]
         file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
-        data_generator = Photon2Tab2(request, file_ids_dict, folder_id)
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        data_generator = Photon2Tab2(request, file_ids_dict, folder_id, file_names)
         fparams, jsons = data_generator.generate_full_output()
 
         graphJSON = jsons[0]
     else:
+        # Set default values
         graphJSON = None
         fparams = {
             "fs": 5,
@@ -52,16 +63,20 @@ def photon2_tab2():
 
     return render_template('photon2/tab2.html', graphJSON=graphJSON, fparams=fparams)
 
+# Route and logic for 'Tab 3' of Photon2
 @app.route('/photon2/tab3', methods=['GET', 'POST'])
 def photon2_tab3():
     if request.method == "POST":
+        # Upload inputted files and generate required data
+        file_names = ["signals", "event"]
         file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
-        data_generator = Photon2Tab3(request, file_ids_dict, folder_id)
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        data_generator = Photon2Tab3(request, file_ids_dict, folder_id, file_names)
         fparams, matCharts, num_rois = data_generator.generate_full_output()
 
         graphs = []
 
+        # Generate graphs for different chart types
         for chart in matCharts:
             graphBytes = {}
             
@@ -74,6 +89,7 @@ def photon2_tab3():
             
             graphs.append(graphBytes)
     else:
+        # Set default values
         graphs = None
         num_rois = 0
         fparams = {
@@ -93,6 +109,7 @@ def photon2_tab3():
             'interesting_rois': "0,1"
         }
 
+        # Adjust default parameters based on normalization type
         if 'zscore' in fparams['flag_normalization']:
             fparams['data_trial_resolved_key'] = 'zdata'
             fparams['data_trial_avg_key'] = 'ztrial_avg_data'
@@ -106,21 +123,29 @@ def photon2_tab3():
 
     return render_template('photon2/tab3.html', graphs=graphs, fparams=fparams, num_rois=num_rois)
 
+# Route and logic for 'Tab 4' of Photon2
 @app.route('/photon2/tab4', methods=['GET', 'POST'])
 def photon2_tab4():
     if request.method == "POST":
+        # Upload inputted files and generate required data
+        file_names = ["signals", "event"]
         file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, ["signals", "event"], file_ext)
-        data_generator = Photon2Tab4(request, file_ids_dict, folder_id)
-        fparams, graph1JSON, jsons = data_generator.generate_full_output()
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        data_generator = Photon2Tab4(request, file_ids_dict, folder_id, file_names)
+        fparams, jsons = data_generator.generate_full_output()
 
         graphs = []
-        for json in jsons:
+
+        # Generate graphs for different data
+        for i, json in enumerate(jsons):
+            if i == 0:
+                continue
             graphs.append(get_encoded(json))
 
     else:
+        # Set default values
         graphs = None
-        graph1JSON = None
+        jsons = [None]
         fparams = {
             "fs": 5,
             'trial_start_end': "-2,8",
@@ -138,7 +163,8 @@ def photon2_tab4():
             "sortwindow": "15,100"
         }
 
-    return render_template('photon2/tab4.html', graph1JSON=graph1JSON, graphs=graphs, fparams=fparams)
+    return render_template('photon2/tab4.html', graph1JSON=jsons[0], graphs=graphs, fparams=fparams)
 
+# Run the application if this script is executed directly
 if __name__ == '__main__':
     app.run(debug=True)

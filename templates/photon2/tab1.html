@@ -54,9 +54,6 @@
                         <label for="ops">Upload ops.npy</label><br>
                         <input type="file" id="ops" name="ops"><br><br>
 
-                        <label for="spks">Upload spks.npy</label><br>
-                        <input type="file" id="spks" name="spks"><br><br>
-
                         <label for="stat">Upload stat.npy</label><br>
                         <input type="file" id="stat" name="stat"><br><br>
                     </div>
@@ -70,6 +67,9 @@
                 <hr />
                 <label for="show_labels">Show Labels:</label><br>
                 <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{% endif %}><br><br>
+
+                <label for="color_all_rois">Color All ROIs:</label><br>
+                <input type="checkbox" id="color_all_rois" name="color_all_rois" {% if fparams['color_all_rois'] %}checked{% endif %}><br><br>
 
                 <label for="tseries_start_end">T-series Start to End:</label>
                 <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format: 1,2)</p>
