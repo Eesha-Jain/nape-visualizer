@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='style.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='tooltip.css')}}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,92 +67,92 @@
 
                 <div class="row">
                     <div>
-                        <label for="fs">Sampling Rate:</label><br>
+                        <label for="fs" class="tooltip-right" data-tooltip="I'm the tooltip text.">Sampling Rate:</label><br>
                         <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
 
-                        <label for="selected_conditions">Selected Conditions:</label>
+                        <label for="selected_conditions" class="tooltip-right" data-tooltip="I'm the tooltip text.">Selected Conditions:</label>
                         <p class="description">Set to "None" if want to include all conditions from behavior data,
                             otherwise make it a list (Format: item,item2)</p>
                         <input type="text" id="selected_conditions" name="selected_conditions"
                             value="{{ fparams['selected_conditions'] }}" required><br><br>
 
-                        <label for="trial_start_end">Trial Start and End:</label>
+                        <label for="trial_start_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">Trial Start and End:</label>
                         <p class="description">In seconds. Input a list (Format: starttime,endtime)</p>
                         <input type="text" id="trial_start_end" name="trial_start_end"
                             value="{{ fparams['trial_start_end'] }}" required><br><br>
 
-                        <label for="flag_normalization">Normalization:</label>
+                        <label for="flag_normalization" class="tooltip-right" data-tooltip="I'm the tooltip text.">Normalization:</label>
                         <p class="description">zscore or None</p>
                         <input type="text" id="flag_normalization" name="flag_normalization"
                             value="{{ fparams['flag_normalization'] }}" required><br><br>
 
-                        <label for="baseline_end">Baseline End:</label>
+                        <label for="baseline_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">Baseline End:</label>
                         <p class="description">Baseline epoch end time (in seconds) for performing baseline
                             normalization</p>
                         <input type="text" id="baseline_end" name="baseline_end" value="{{ fparams['baseline_end'] }}"
                             required><br><br>
 
-                        <label for="event_dur">Event Duration:</label>
+                        <label for="event_dur" class="tooltip-right" data-tooltip="I'm the tooltip text.">Event Duration:</label>
                         <p class="description">Duration of stim/event in seconds. Displays a line below main plot
                             indicating event duration</p>
                         <input type="number" id="event_dur" name="event_dur" value="{{ fparams['event_dur'] }}"
                             required><br><br>
 
-                        <label for="opto_blank_frame">Opto Blank Frame:</label>
+                        <label for="opto_blank_frame" class="tooltip-right" data-tooltip="I'm the tooltip text.">Opto Blank Frame:</label>
                         <p class="description">If PMTs were blanked during stim, set stim times to None
                         </p>
                         <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if
                             fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
 
-                        <label for="data_trial_resolved_key">Trial Resolved Key:</label><br />
+                        <label for="data_trial_resolved_key" class="tooltip-right" data-tooltip="I'm the tooltip text.">Trial Resolved Key:</label><br />
                         <input type="text" id="data_trial_resolved_key" name="data_trial_resolved_key"
                             value="{{ fparams['data_trial_resolved_key'] }}" required><br><br>
 
-                        <label for="ylabel">Y-Axis Label:</label><br />
+                        <label for="ylabel" class="tooltip-right" data-tooltip="I'm the tooltip text.">Y-Axis Label:</label><br />
                         <input type="text" id="ylabel" name="ylabel" value="{{ fparams['ylabel'] }}" required><br><br>
                     </div>
 
                     <div>
-                        <label for="flag_sort_rois">Sort ROIs:</label>
+                        <label for="flag_sort_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Sort ROIs:</label>
                         <p class="description">If true, ROIs are sorted by activity</p>
                         <input type="checkbox" id="flag_sort_rois" name="flag_sort_rois" {% if fparams['flag_sort_rois']
                             %}checked{% endif %}><br><br>
 
-                        <label for="event_sort_analysis_win">Event Sort Analysis Window:</label>
+                        <label for="event_sort_analysis_win" class="tooltip-right" data-tooltip="I'm the tooltip text.">Event Sort Analysis Window:</label>
                         <p class="description">Time window (in seconds); Format: 1,2</p>
                         <input type="text" id="event_sort_analysis_win" name="event_sort_analysis_win"
                             value="{{ fparams['event_sort_analysis_win'] }}" required><br><br>
 
-                        <label for="user_sort_method">User Sort Method:</label>
+                        <label for="user_sort_method" class="tooltip-right" data-tooltip="I'm the tooltip text.">User Sort Method:</label>
                         <p class="description">peak_time or max_value</p>
                         <input type="text" id="user_sort_method" name="user_sort_method"
                             value="{{ fparams['user_sort_method'] }}" required><br><br>
 
-                        <label for="roi_sort_cond">ROI Sort Condition:</label>
+                        <label for="roi_sort_cond" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROI Sort Condition:</label>
                         <p class="description">For roi-resolved heatmaps, which condition to sort ROIs by</p>
                         <input type="text" id="roi_sort_cond" name="roi_sort_cond"
                             value="{{ fparams['roi_sort_cond'] }}" required><br><br>
 
-                        <label for="flag_roi_trial_avg_errbar">ROI Trial Average Error Bar</label>
+                        <label for="flag_roi_trial_avg_errbar" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROI Trial Average Error Bar</label>
                         <p class="description">Toggle to show error bar on roi- and trial-averaged traces</p>
                         <input type="checkbox" id="flag_roi_trial_avg_errbar" name="flag_roi_trial_avg_errbar" {% if
                             fparams['flag_roi_trial_avg_errbar'] %}checked{% endif %}><br><br>
 
-                        <label for="flag_trial_avg_errbar">Trial Average Error Bar:</label>
+                        <label for="flag_trial_avg_errbar" class="tooltip-right" data-tooltip="I'm the tooltip text.">Trial Average Error Bar:</label>
                         <p class="description">Toggle to show error bars on the trial-avg traces</p>
                         <input type="checkbox" id="flag_trial_avg_errbar" name="flag_trial_avg_errbar" {% if
                             fparams['flag_trial_avg_errbar'] %}checked{% endif %}><br><br>
 
-                        <label for="interesting_rois">Interesting ROIs:</label>
+                        <label for="interesting_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Interesting ROIs:</label>
                         <p class="description">Should be in a list in the following format: 1,2</p>
                         <input type="text" id="interesting_rois" name="interesting_rois"
                             value="{{ fparams['interesting_rois'] }}" required><br><br>
 
-                        <label for="data_trial_avg_key">Trial Average Key:</label><br />
+                        <label for="data_trial_avg_key" class="tooltip-right" data-tooltip="I'm the tooltip text.">Trial Average Key:</label><br />
                         <input type="text" id="data_trial_avg_key" name="data_trial_avg_key"
                             value="{{ fparams['data_trial_avg_key'] }}" required><br><br>
 
-                        <label for="cmap_">CMAP:</label><br />
+                        <label for="cmap_" class="tooltip-right" data-tooltip="I'm the tooltip text.">CMAP:</label><br />
                         <input type="text" id="cmap_" name="cmap_" value="{{ fparams['cmap_'] }}" required><br><br>
                     </div>
                 </div>

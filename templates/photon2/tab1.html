@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='style.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='tooltip.css')}}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,18 +66,18 @@
                     </div>
                 </div>
                 <hr />
-                <label for="show_labels">Show Labels:</label><br>
+                <label for="show_labels" class="tooltip-right" data-tooltip="I'm the tooltip text.">Show Labels:</label><br>
                 <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{% endif %}><br><br>
 
-                <label for="color_all_rois">Color All ROIs:</label><br>
+                <label for="color_all_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Color All ROIs:</label><br>
                 <input type="checkbox" id="color_all_rois" name="color_all_rois" {% if fparams['color_all_rois'] %}checked{% endif %}><br><br>
 
-                <label for="tseries_start_end">T-series Start to End:</label>
+                <label for="tseries_start_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">T-series Start to End:</label>
                 <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format: 1,2)</p>
                 <input type="text" id="tseries_start_end" name="tseries_start_end"
                     value="{{ fparams['tseries_start_end'] }}" required><br><br>
 
-                <label for="rois_to_plot">ROIs to Plot:</label>
+                <label for="rois_to_plot" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROIs to Plot:</label>
                 <p class="description">This can be a list of select ROIs (Format: 1,2,3), an integer n containing the first n ROIs to
                     plot, or "None" to plot all valid ROIs</p>
                 <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}"

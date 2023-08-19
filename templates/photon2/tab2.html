@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='style.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='tooltip.css')}}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,23 +65,23 @@
 
                 <hr />
 
-                <label for="fs">Sampling Rate:</label><br>
+                <label for="fs" class="tooltip-right" data-tooltip="I'm the tooltip text.">Sampling Rate:</label><br>
                 <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
 
-                <label for="opto_blank_frame">Opto Blank Frame:</label>
+                <label for="opto_blank_frame" class="tooltip-right" data-tooltip="I'm the tooltip text.">Opto Blank Frame:</label>
                 <p class="description">If PMTs were blanked during stim, set stim times to NaN (instead of 0)</p>
                 <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if fparams['opto_blank_frame'] %}checked{% endif %}><br><br>
 
-                <label for="num_rois">Number of Rois:</label>
+                <label for="num_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Number of Rois:</label>
                 <p class="description">Set to "all" if want to show all cells</p>
                 <input type="text" id="num_rois" name="num_rois" value="{{ fparams['num_rois'] }}" required><br><br>
 
-                <label for="selected_conditions">Selected Conditions:</label>
+                <label for="selected_conditions" class="tooltip-right" data-tooltip="I'm the tooltip text.">Selected Conditions:</label>
                 <p class="description">Set to "None" if want to include all conditions from behavior data</p>
                 <input type="text" id="selected_conditions" name="selected_conditions"
                     value="{{ fparams['selected_conditions'] }}" required><br><br>
 
-                <label for="flag_normalization">Normalization:</label>
+                <label for="flag_normalization" class="tooltip-right" data-tooltip="I'm the tooltip text.">Normalization:</label>
                 <select name="flag_normalization" id="flag_normalization" selected="{{ fparams['flag_normalization'] }}"
                     required>
                     <option value="dff_perc">dff_perc</option>
