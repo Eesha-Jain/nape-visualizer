@@ -110,7 +110,9 @@ class Photon2(ABC):
             self.processed_fparams[param] = process_input(self.request.form.get(param), self.parameters[param])
     
     def generate_params_with_file_ext(self):
-        self.generate_params()
+        for param in self.parameters.keys():
+            self.fparams[param] = self.request.form.get(param)
+            self.processed_fparams[param] = process_input(self.request.form.get(param), self.parameters[param])
         self.file_extension = self.request.form.get("file_extension").split(",") if len(self.request.form.get("file_extension").split(",")) > 1 else [self.request.form.get("file_extension")]
 
     def get_contents(self):
