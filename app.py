@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from analysis import upload_inputted_files, get_encoded, Photon2Tab1, Photon2Tab2, Photon2Tab3, Photon2Tab4
+from analysis import upload_inputted_files, get_encoded, Photon2Tab1, Photon2Tab2, Photon2Tab3, Photon2Tab4, Photon2Tab5
 
 # Create a Flask application instance
 app = Flask(__name__)
@@ -16,7 +16,7 @@ def photon2_tab1():
     if request.method == "POST":
         # Upload inputted files and generate required data
         file_names = ["ff", "fneu", "iscell", "ops", "stat"]
-        folder_id, file_ids_dict = upload_inputted_files(request, file_names, ".npy")
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, [".npy", ".npy", ".npy", ".npy", ".npy"])
         data_generator = Photon2Tab1(request, file_ids_dict, folder_id, file_names)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -43,8 +43,7 @@ def photon2_tab2():
     if request.method == "POST":
         # Upload inputted files and generate required data
         file_names = ["signals", "event"]
-        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, [request.form.get("signals_file_extension"), request.form.get("event_file_extension")])
         data_generator = Photon2Tab2(request, file_ids_dict, folder_id, file_names)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -54,11 +53,12 @@ def photon2_tab2():
         graphJSON = None
         fparams = {
             "fs": 5,
-            "opto_blank_frame": "true",
+            "opto_blank_frame": None,
             "num_rois": 10, 
             "selected_conditions": None,
             "flag_normalization": "dff_perc",
-            "file_extension": ".csv"
+            "signals_file_extension": ".csv",
+            "event_file_extension": ".csv"
         }
 
     return render_template('photon2/tab2.html', graphJSON=graphJSON, fparams=fparams)
@@ -69,8 +69,7 @@ def photon2_tab3():
     if request.method == "POST":
         # Upload inputted files and generate required data
         file_names = ["signals", "event"]
-        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, [request.form.get("signals_file_extension"), request.form.get("event_file_extension")])
         data_generator = Photon2Tab3(request, file_ids_dict, folder_id, file_names)
         fparams, matCharts, num_rois = data_generator.generate_full_output()
 
@@ -106,7 +105,9 @@ def photon2_tab3():
             'roi_sort_cond': 'plus',
             'flag_roi_trial_avg_errbar': "true",
             'flag_trial_avg_errbar': "true",
-            'interesting_rois': "0,1"
+            'interesting_rois': "0,1",
+            "signals_file_extension": ".csv",
+            "event_file_extension": ".csv"
         }
 
         # Adjust default parameters based on normalization type
@@ -129,8 +130,7 @@ def photon2_tab4():
     if request.method == "POST":
         # Upload inputted files and generate required data
         file_names = ["signals", "event"]
-        file_ext = request.form.get("file_extension").split(",") if len(request.form.get("file_extension").split(",")) > 1 else [request.form.get("file_extension")]
-        folder_id, file_ids_dict = upload_inputted_files(request, file_names, file_ext)
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, [request.form.get("signals_file_extension"), request.form.get("event_file_extension")])
         data_generator = Photon2Tab4(request, file_ids_dict, folder_id, file_names)
         fparams, jsons = data_generator.generate_full_output()
 
@@ -160,10 +160,57 @@ def photon2_tab4():
             "heatmap_cmap_scaling": 1,
             "group_data": None,
             "group_data_conditions": 'cs_plus,cs_minus',
-            "sortwindow": "15,100"
+            "sortwindow": "15,100",
+            "signals_file_extension": ".csv",
+            "event_file_extension": ".csv"
         }
 
     return render_template('photon2/tab4.html', graph1JSON=jsons[0], graphs=graphs, fparams=fparams)
+
+# Route and logic for 'Tab 5' of Photon5
+@app.route('/photon2/tab5', methods=['GET', 'POST'])
+def photon2_tab5():
+    if request.method == "POST":
+        # Upload inputted files and generate required data
+        file_names = ["signals", "event", "sima_mc", "sima_masks"]
+        folder_id, file_ids_dict = upload_inputted_files(request, file_names, [request.form.get("signals_file_extension"), request.form.get("event_file_extension"), ".h5", ".npy"])
+        data_generator = Photon2Tab5(request, file_ids_dict, folder_id, file_names)
+        fparams, jsons, conditions = data_generator.generate_full_output()
+
+        graphs = []
+        graphs.append(get_encoded(jsons[0]))
+
+        graphs_sub = []
+        for graph in jsons[1]:
+            json = {}
+            json["contour"] = get_encoded(graph["contour"])
+            json["linegraph"] = get_encoded(graph["linegraph"])
+            graphs_sub.append(json)
+        
+        graphs.append(graphs_sub)
+
+        graphs_sub = []
+        for graph in jsons[2]:
+            graphs_sub.append(get_encoded(graph))
+        
+        graphs.append(graphs_sub)
+    else:
+        # Set default values
+        graphs = [None, None, None]
+        conditions = None
+        fparams = {
+            "fs": 5,
+            'trial_start_end': "-2,8",
+            'baseline_end': -0.2,
+            "selected_conditions": "None",
+            'opto_blank_frame': None,
+            "rois_to_plot": None,
+            "activity_name": None,
+            "raw_npilCorr": None,
+            "analysis_win": "0,None"
+        }
+
+    return render_template('photon2/tab5.html', graphs1=graphs[0], graphs2=graphs[1], graphs3=graphs[2], fparams=fparams, conditions=conditions)
 
 # Run the application if this script is executed directly
 if __name__ == '__main__':

@@ -16,6 +16,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 </head>
 
 <body>
@@ -31,6 +33,7 @@
                 <a href="/photon2/tab2" class="active">Whole Session</a>
                 <a href="/photon2/tab3">Event Analysis</a>
                 <a href="/photon2/tab4">Event Clustering</a>
+                <a href="/photon2/tab5">Plot Activity Clustering</a>
             </div>
         </div>
     </div>
@@ -38,13 +41,25 @@
     <h1>NAPE Visualizer</h1>
     <h2>Whole Session</h2>
 
+    {% if graphJSON %}
+    <div class="flex">
+        <button id="downloadAllButton">Download All Graphs</button>
+    </div>
+    {% endif %}
+
     <div class="container larger-grid">
         <form action="{{ url_for('photon2_tab2') }}" method="post" enctype="multipart/form-data" class="box">
             <div style="margin: 10px;">
-                <label for="file_extension">File Extension:</label>
-                <select name="file_extension" id="file_extension" selected="{{ fparams['file_extension'] }}" required>
-                    <option value=".csv,.csv">.csv</option>
-                    <option value=".npy,.pkl">.npy/.pkl</option>
+                <label for="signals_file_extension">Signals File Extension:</label>
+                <select name="signals_file_extension" id="signals_file_extension" selected="{{ fparams['signals_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".npy">.npy</option>
+                </select><br><br>
+
+                <label for="event_file_extension">Event File Extension:</label>
+                <select name="event_file_extension" id="event_file_extension" selected="{{ fparams['event_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".pkl">.pkl</option>
                 </select><br><br>
 
                 <div class="row">
@@ -107,6 +122,23 @@
         if (graphJSON != NaN) {
             Plotly.react('chart-container', graphJSON.data, graphJSON.layout, { displayModeBar: true });
         }
+
+        document.getElementById("downloadAllButton").addEventListener("click", async function () {
+            var zip = new JSZip();
+
+            // Add graph2JSON
+            var graphImgDataUrl = await Plotly.toImage('chart-container');
+            zip.file("graph.png", graphImgDataUrl.split(',')[1], { base64: true });
+
+            // Generate and download the zip file
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+                var url = URL.createObjectURL(content);
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = "graphs.zip";
+                link.click();
+            });
+        });
     </script>
 </body>
 

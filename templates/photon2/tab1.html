@@ -16,6 +16,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 </head>
 
 <body>
@@ -31,12 +33,19 @@
                 <a href="/photon2/tab2">Whole Session</a>
                 <a href="/photon2/tab3">Event Analysis</a>
                 <a href="/photon2/tab4">Event Clustering</a>
+                <a href="/photon2/tab5">Plot Activity Clustering</a>
             </div>
         </div>
     </div>
 
     <h1>NAPE Visualizer</h1>
     <h2>Suite2P ROI Trace</h2>
+
+    {% if graph1 %}
+    <div class="flex">
+        <button id="downloadAllButton">Download All Graphs</button>
+    </div>
+    {% endif %}
 
     <div class="container larger-grid">
         <form action="{{ url_for('photon2_tab1') }}" method="post" enctype="multipart/form-data" class="box box-inputs">
@@ -66,19 +75,27 @@
                     </div>
                 </div>
                 <hr />
-                <label for="show_labels" class="tooltip-right" data-tooltip="I'm the tooltip text.">Show Labels:</label><br>
-                <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{% endif %}><br><br>
+                <label for="show_labels" class="tooltip-right" data-tooltip="I'm the tooltip text.">Show
+                    Labels:</label><br>
+                <input type="checkbox" id="show_labels" name="show_labels" {% if fparams['show_labels'] %}checked{%
+                    endif %}><br><br>
 
-                <label for="color_all_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Color All ROIs:</label><br>
-                <input type="checkbox" id="color_all_rois" name="color_all_rois" {% if fparams['color_all_rois'] %}checked{% endif %}><br><br>
+                <label for="color_all_rois" class="tooltip-right" data-tooltip="I'm the tooltip text.">Color All
+                    ROIs:</label><br>
+                <input type="checkbox" id="color_all_rois" name="color_all_rois" {% if fparams['color_all_rois']
+                    %}checked{% endif %}><br><br>
 
-                <label for="tseries_start_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">T-series Start to End:</label>
-                <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format: 1,2)</p>
+                <label for="tseries_start_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">T-series Start
+                    to End:</label>
+                <p class="description">Set to "None" will plot the whole session, otherwise make a list (Format: 1,2)
+                </p>
                 <input type="text" id="tseries_start_end" name="tseries_start_end"
                     value="{{ fparams['tseries_start_end'] }}" required><br><br>
 
-                <label for="rois_to_plot" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROIs to Plot:</label>
-                <p class="description">This can be a list of select ROIs (Format: 1,2,3), an integer n containing the first n ROIs to
+                <label for="rois_to_plot" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROIs to
+                    Plot:</label>
+                <p class="description">This can be a list of select ROIs (Format: 1,2,3), an integer n containing the
+                    first n ROIs to
                     plot, or "None" to plot all valid ROIs</p>
                 <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}"
                     required><br><br>
@@ -87,36 +104,69 @@
             </div>
         </form>
         {% if graph1 %}
-            <div class="box" style="padding: 0;">
-                <div id="chart1-container" style="padding: 10px;"><img src='data:image/png;base64,{{ graph1 | safe }}' width="100%" height="auto"/></div>
-            </div>
+        <div class="box" style="padding: 0;">
+            <div id="chart1-container" style="padding: 10px;"><img src='data:image/png;base64,{{ graph1 | safe }}'
+                    width="100%" height="auto" /></div>
+        </div>
         {% endif %}
         {% if graph2JSON %}
-            <div class="box" style="padding: 0;">
-                <div id="chart2-container" style="margin-left: 5px;"></div>
-            </div>
+        <div class="box" style="padding: 0;">
+            <div id="chart2-container" style="margin-left: 5px;"></div>
+        </div>
         {% endif %}
         {% if graph3JSON %}
-            <div class="box" style="padding: 0;">
-                <div id="chart3-container" style="margin-left: 5px; margin-bottom: 5px;"></div>
-            </div>
+        <div class="box" style="padding: 0;">
+            <div id="chart3-container" style="margin-left: 5px; margin-bottom: 5px;"></div>
+        </div>
         {% endif %}
     </div>
     <br />
 
     <script type="text/javascript">
         // Get graph JSON from Flask backend
-        var graph2JSON = {{ graph2JSON | safe }};
+        function generatePlotlyGraphs() {
+            var graph2JSON = {{ graph2JSON | safe }};
 
-        if (graph2JSON != NaN) {
-            Plotly.react('chart2-container', graph2JSON.data, graph2JSON.layout, { displayModeBar: true });
+            if (graph2JSON != NaN) {
+                Plotly.react('chart2-container', graph2JSON.data, graph2JSON.layout, { displayModeBar: true });
+            }
+
+            var graph3JSON = {{ graph3JSON | safe }};
+
+            if (graph3JSON != NaN) {
+                Plotly.react('chart3-container', graph3JSON.data, graph3JSON.layout, { displayModeBar: true });
+            }
         }
 
-        var graph3JSON = {{ graph3JSON | safe }};
+        generatePlotlyGraphs();
 
-        if (graph3JSON != NaN) {
-            Plotly.react('chart3-container', graph3JSON.data, graph3JSON.layout, { displayModeBar: true });
-        }
+        document.getElementById("downloadAllButton").addEventListener("click", async function () {
+            var zip = new JSZip();
+
+            var graph2JSON = {{ graph2JSON | safe }};
+            var graph3JSON = {{ graph3JSON | safe }};
+
+            // Add graph1 image
+            var graph1Image = '{{ graph1 | safe }}';
+            zip.file("graph1.png", graph1Image, { base64: true });
+
+            // Add graph2JSON
+            var graph2ImgDataUrl = await Plotly.toImage('chart2-container');
+            zip.file("graph2.png", graph2ImgDataUrl.split(',')[1], { base64: true });
+
+            // Add graph3JSON
+            var graph3ImgDataUrl = await Plotly.toImage('chart3-container');
+            zip.file("graph3.png", graph3ImgDataUrl.split(',')[1], { base64: true });
+
+            // Generate and download the zip file
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+                var url = URL.createObjectURL(content);
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = "graphs.zip";
+                link.click();
+            });
+        });
     </script>
 </body>
 

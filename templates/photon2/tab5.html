@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>NAPE Visualizer | Plot Activity Clustering</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="shortcut icon" href="https://www.ehs.washington.edu/sites/all/themes/ehs_subtheme/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='navbar.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('.static', filename='tooltip.css')}}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/" class="pagetitle">Nape Visualizer</a>
+        <a href="/">Photometry</a>
+        <div class="dropdown">
+            <button class="dropbtn">2-Photon
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                <a href="/photon2/tab1">Suite2P ROI Trace</a>
+                <a href="/photon2/tab2">Whole Session</a>
+                <a href="/photon2/tab3">Event Analysis</a>
+                <a href="/photon2/tab4">Event Clustering</a>
+                <a href="/photon2/tab5" class="active">Plot Activity Clustering</a>
+            </div>
+        </div>
+    </div>
+
+    <h1>NAPE Visualizer</h1>
+    <h2>Plot Activity Clustering</h2>
+    <p style="text-align: center"><i>Note that this analysis takes longer then the others</i></p>
+
+    {% if graphs1 %}
+    <div class="flex">
+        <button id="downloadAllButton">Download All Graphs</button>
+    </div>
+    {% endif %}
+
+    <div class="container larger-grid">
+        <form action="{{ url_for('photon2_tab5') }}" method="post" enctype="multipart/form-data" class="box">
+            <div style="margin: 10px;">
+                <label for="signals_file_extension">Signals File Extension:</label>
+                <select name="signals_file_extension" id="signals_file_extension"
+                    selected="{{ fparams['signals_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".npy">.npy</option>
+                </select><br><br>
+
+                <label for="event_file_extension">Event File Extension:</label>
+                <select name="event_file_extension" id="event_file_extension"
+                    selected="{{ fparams['event_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".pkl">.pkl</option>
+                </select><br><br>
+
+                <div class="row">
+                    <div>
+                        <label for="signals">Upload signals file:</label><br>
+                        <input type="file" id="signals" name="signals"><br><br>
+
+                        <label for="event">Upload event file:</label><br>
+                        <input type="file" id="events" name="event"><br><br>
+
+                        <label for="sima_mc">Upload sima mc h5 file:</label><br>
+                        <input type="file" id="sima_mc" name="sima_mc"><br><br>
+
+                        <label for="sima_masks">Upload sima masks npy file:</label><br>
+                        <input type="file" id="sima_masks" name="sima_masks"><br><br>
+                    </div>
+                    <div>
+                        <label for="folder">OR Upload a folder containing all these files:</label>
+                        <p class="description">File name should contain "signals", "event", "sima_masks", or "sima_mc"
+                        </p>
+                        <input name="folder" type="file" id="files" multiple="" directory="" webkitdirectory=""
+                            mozdirectory=""><br><br>
+                    </div>
+                </div>
+
+                <hr />
+
+                <label for="fs" class="tooltip-right" data-tooltip="I'm the tooltip text.">Sampling Rate:</label>
+                <p class="description">Sampling rate of the activity data</p>
+                <input type="number" id="fs" name="fs" value="{{ fparams['fs'] }}" required><br><br>
+
+                <label for="trial_start_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">Trial Start and
+                    End:</label>
+                <p class="description">In seconds. Make a list in the following format: starttime,endtime</p>
+                <input type="text" id="trial_start_end" name="trial_start_end" value="{{ fparams['trial_start_end'] }}"
+                    required><br><br>
+
+                <label for="baseline_end" class="tooltip-right" data-tooltip="I'm the tooltip text.">Baseline
+                    End:</label>
+                <p class="description">Baseline epoch end time (in seconds) for performing baseline normalization</p>
+                <input type="text" id="baseline_end" name="baseline_end" value="{{ fparams['baseline_end'] }}"
+                    required><br><br>
+
+                <label for="selected_conditions" class="tooltip-right" data-tooltip="I'm the tooltip text.">Selected
+                    Conditions:</label>
+                <p class="description">Set to "None" if want to include all conditions from behavior data, otherwise
+                    make it a list (Format: item,item2)</p>
+                <input type="text" id="selected_conditions" name="selected_conditions"
+                    value="{{ fparams['selected_conditions'] }}" required><br><br>
+
+                <label for="opto_blank_frame" class="tooltip-right" data-tooltip="I'm the tooltip text.">Opto Blank
+                    Frame:</label>
+                <p class="description">If PMTs were blanked during stim, set stim times to None
+                </p>
+                <input type="checkbox" id="opto_blank_frame" name="opto_blank_frame" {% if fparams['opto_blank_frame']
+                    %}checked{% endif %}><br><br>
+
+                <label for="rois_to_plot" class="tooltip-right" data-tooltip="I'm the tooltip text.">ROIs to
+                    Plot:</label>
+                <p class="description">This can be a list of select ROIs (Format: 1,2,3), an integer n containing the
+                    first n ROIs to
+                    plot, or "None" to plot all valid ROIs</p>
+                <input type="text" id="rois_to_plot" name="rois_to_plot" value="{{ fparams['rois_to_plot'] }}"
+                    required><br><br>
+
+                <label for="activity_name" class="tooltip-right" data-tooltip="I'm the tooltip text.">Activity
+                    Name:</label>
+                <p class="description">If true, contour text will be the ROI number. If false, it will be the activity
+                    z-score.</p>
+                <input type="checkbox" id="activity_name" name="activity_name" {% if fparams['activity_name']%}checked{%
+                    endif %}><br><br>
+
+                <label for="raw_npilCorr" class="tooltip-right" data-tooltip="I'm the tooltip text.">Activity
+                    Name:</label>
+                <p class="description">True for neuropil corrected signal. False for raw.</p>
+                <input type="checkbox" id="raw_npilCorr" name="raw_npilCorr" {% if fparams['raw_npilCorr']%}checked{%
+                    endif %}><br><br>
+
+                <label for="analysis_win" class="tooltip-right" data-tooltip="I'm the tooltip text.">Analysis
+                    Window:</label>
+                <p class="description">In seconds. Make a list in the following format: starttime,endtime</p>
+                <input type="text" id="analysis_win" name="analysis_win" value="{{ fparams['analysis_win'] }}"
+                    required><br><br>
+
+                <div class="flex"><input type="submit" value="Submit" /></div>
+            </div>
+        </form>
+        {% if graphs1 %}
+            <div class="box">
+                <div id="chart-container" style="padding: 20px;"><img src='data:image/png;base64,{{graphs1}}' width="100%" height="auto" /></div>
+            </div>
+        {% endif %}
+
+        {% if conditions %}
+        <div class="box">
+            <div>
+                <select id="condition-selection" style="margin: 10px;">
+                    {% for n in range(conditions|length) %}
+                    <option value="{{n}}">{{conditions[n]}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="chart-graph2" style="padding: 0;"></div>
+        </div>
+        {% endif %}
+
+        {% if graphs3 %}
+        <div class="box">
+            <div>
+                <select id="graph3-selection" style="margin: 10px;">
+                    {% for n in range(graphs3|length) %}
+                    <option value="{{n}}">{{ n }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="chart-graph3" style="padding: 0;"></div>
+        </div>
+        {% endif %}
+    </div>
+    <br />
+
+    <script>
+        var select_condition = document.getElementById("condition-selection");
+        var graphList_graph2 = {{ graphs2 | safe }};
+        var chart_graph2 = document.getElementById("chart-graph2");
+
+        function showGraphs2() {
+            var selectedROI = Number(select_condition.value);
+            chart_graph2.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList_graph2[selectedROI].contour}' width="100%" height="auto"/></div><div id="chart2-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList_graph2[selectedROI].linegraph}' width="100%" height="auto"/></div>`;
+        }
+
+        select_condition.addEventListener("change", showGraphs2)
+        showGraphs2();
+
+        var select_graph3 = document.getElementById("graph3-selection");
+        var graphList_graph3 = {{ graphs3 | safe }};
+        var chart_graph3 = document.getElementById("chart-graph3");
+
+        function showGraphs3() {
+            var selectedROI = Number(select_graph3.value);
+            chart_graph3.innerHTML = `<div id="chart1-container" style="padding: 20px;"><img src='data:image/png;base64,${graphList_graph3[selectedROI]}' width="100%" height="auto"/></div>`;
+        }
+
+        select_graph3.addEventListener("change", showGraphs3)
+        showGraphs3();
+    </script>
+</body>
+</html>

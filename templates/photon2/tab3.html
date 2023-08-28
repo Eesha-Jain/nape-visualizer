@@ -16,6 +16,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 </head>
 
 <body>
@@ -31,6 +33,7 @@
                 <a href="/photon2/tab2">Whole Session</a>
                 <a href="/photon2/tab3" class="active">Event Analysis</a>
                 <a href="/photon2/tab4">Event Clustering</a>
+                <a href="/photon2/tab5">Plot Activity Clustering</a>
             </div>
         </div>
     </div>
@@ -38,13 +41,25 @@
     <h1>NAPE Visualizer</h1>
     <h2>Event Analysis</h2>
 
+    {% if num_rois > 0 %}
+    <div class="flex">
+        <button id="downloadAllButton">Download All Graphs</button>
+    </div>
+    {% endif %}
+
     <div class="container single-grid">
         <form action="{{ url_for('photon2_tab3') }}" method="post" enctype="multipart/form-data" class="box">
             <div style="margin: 10px;">
-                <label for="file_extension">File Extension:</label>
-                <select name="file_extension" id="file_extension" selected="{{ fparams['file_extension'] }}" required>
-                    <option value=".csv,.csv">.csv</option>
-                    <option value=".npy,.pkl">.npy/.pkl</option>
+                <label for="signals_file_extension">Signals File Extension:</label>
+                <select name="signals_file_extension" id="signals_file_extension" selected="{{ fparams['signals_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".npy">.npy</option>
+                </select><br><br>
+
+                <label for="event_file_extension">Event File Extension:</label>
+                <select name="event_file_extension" id="event_file_extension" selected="{{ fparams['event_file_extension'] }}" required>
+                    <option value=".csv">.csv</option>
+                    <option value=".pkl">.pkl</option>
                 </select><br><br>
 
                 <div class="row">
@@ -178,7 +193,7 @@
 
     <script type="text/javascript">
         var select = document.getElementById("roi-selection");
-        var graphList = {{ graphs | safe }}
+        var graphList = {{ graphs | safe }};
         var chart = document.getElementById("chart");
 
         function showGraphs() {
@@ -193,6 +208,39 @@
 
         select.addEventListener("change", showGraphs)
         showGraphs();
+
+        document.getElementById("downloadAllButton").addEventListener("click", async function () {
+            var zip = new JSZip();
+
+            var graphList = {{ graphs | safe }};
+            var counter = 0;
+
+            graphList.forEach((graph) => {
+                var name = "roi" + counter;
+
+                if (counter + 1 == graphList.length) {
+                    name = "roi_total";
+                }
+
+                zip.file(name + "_heatmap.png", graph.heatmap, { base64: true });
+                zip.file(name + "_linegraph.png", graph.linegraph, { base64: true });
+
+                if (graph.bargraph) {
+                    zip.file(name + "_bargraph.png", graph.bargraph, { base64: true });
+                }
+
+                counter += 1;
+            });
+
+            // Generate and download the zip file
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+                var url = URL.createObjectURL(content);
+                var link = document.createElement("a");
+                link.href = url;
+                link.download = "graphs.zip";
+                link.click();
+            });
+        });
     </script>
 </body>
 

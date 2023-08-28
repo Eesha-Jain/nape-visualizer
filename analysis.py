@@ -1,6 +1,6 @@
 from drive import upload_to_drive, delete_folder, get_contents_bytefile, get_contents_string
-from visualizer.data import ROITraceProcessor, WholeSessionProcessor, EventRelAnalysisProcessor, EventClusterProcessor
-from visualizer.plots import S2PROITracePlot, WholeSessionPlot, EventRelAnalysisPlot, EventClusterPlot
+from visualizer.data import ROITraceProcessor, WholeSessionProcessor, EventRelAnalysisProcessor, EventClusterProcessor, PlotActivityContoursProcesser
+from visualizer.plots import S2PROITracePlot, WholeSessionPlot, EventRelAnalysisPlot, EventClusterPlot, PlotActivityContoursPlot
 from abc import ABC, abstractmethod
 from io import BytesIO
 import base64
@@ -20,14 +20,31 @@ def none_or_intarray_input(value):
         return None
     else:
         return [int(item) for item in none_or_stringarray_input(value)]
+
+def none_or_mixedarray_input(value):
+    arr = []
+    for val in value.split(","):
+        if val == "None":
+            arr.append(None)
+        else:
+            if val.isdigit() or (val.startswith('-') and val[1:].isdigit()):
+                arr.append(int(val))
+            else:
+                arr.append(val)
+    
+    return arr
     
 def process_input(value, type):
     if type == "intarray":
         return none_or_intarray_input(value)
     elif type == "stringarray":
         return none_or_stringarray_input(value)
+    elif type == "mixedarray":
+        return none_or_mixedarray_input(value)
     elif type == "checkbox":
         return True if value else False
+    elif type == "intcheckbox":
+        return 1 if value else 0
     elif type == "int":
         return int(value)
     elif type == "string":
@@ -52,7 +69,7 @@ def get_encoded(chart):
 # Find respective files from HTML form and upload to Google Drive
 def contains_name(files_dict, name, file_extension):
     for key in files_dict.keys():
-        if name in key and any(ext in key for ext in file_extension):
+        if name in key and file_extension in key:
             return files_dict[key]
 
 def upload_inputted_files(request, file_names, file_extension):
@@ -77,7 +94,7 @@ def upload_inputted_files(request, file_names, file_extension):
                 files_dict[filename[len(filename) - 1]] = file
         
         for i in range(len(file_names)):
-            file = contains_name(files_dict, file_names[i], file_extension)
+            file = contains_name(files_dict, file_names[i], file_extension[i])
             files.append(file)
     
     #Upload files to Google Drive
@@ -104,16 +121,14 @@ class Photon2(ABC):
         self.parameters = {}
         self.contents = {}
     
-    def generate_params(self):
+    def generate_params_dict(self):
         for param in self.parameters.keys():
             self.fparams[param] = self.request.form.get(param)
             self.processed_fparams[param] = process_input(self.request.form.get(param), self.parameters[param])
     
     def generate_params_with_file_ext(self):
-        for param in self.parameters.keys():
-            self.fparams[param] = self.request.form.get(param)
-            self.processed_fparams[param] = process_input(self.request.form.get(param), self.parameters[param])
-        self.file_extension = self.request.form.get("file_extension").split(",") if len(self.request.form.get("file_extension").split(",")) > 1 else [self.request.form.get("file_extension")]
+        self.generate_params_dict()
+        self.file_extension = [self.request.form.get("signals_file_extension"), self.request.form.get("event_file_extension")]
 
     def get_contents(self):
         for i, file_name in enumerate(self.file_names):
@@ -145,7 +160,7 @@ class Photon2Tab1(Photon2):
             "rois_to_plot": "intarray"
         }
 
-        super().generate_params()
+        super().generate_params_dict()
 
     def get_contents(self):
         for file_name in self.file_names:
@@ -284,3 +299,45 @@ class Photon2Tab4(Photon2):
         data_plotter = EventClusterPlot(data_processor)
 
         return [data_plotter.generate_scree_plot(package="plotly").to_json(), data_plotter.generate_heatmap_zscore(), data_plotter.generate_pca_plot(), data_plotter.generate_cluster_condition_plots(), data_plotter.generate_fluorescent_graph(), data_plotter.generate_cluster_plot()]
+    
+# Tab 5 imaging processing class
+class Photon2Tab5(Photon2):
+    def __init__(self, request, file_ids_dict, folder_id, file_names):
+        super().__init__(request, file_ids_dict, folder_id, file_names)
+
+    def generate_params(self):
+        self.parameters = {
+            "raw_npilCorr": "intcheckbox",
+            "fs": "int",
+            "rois_to_plot": "intarray",
+            "analysis_win": "mixedarray",
+            "activity_name": "checkbox",
+            "trial_start_end": "intarray",
+            "baseline_end": "float",
+            "selected_conditions": "stringarray",
+            "opto_blank_frame": "checkbox",
+        }
+
+        super().generate_params_dict()
+        self.file_extension = [self.request.form.get("signals_file_extension"), self.request.form.get("event_file_extension"), ".h5", ".npy"]
+
+    def generate_plots(self):
+        params = [self.processed_fparams[item] for item in self.parameters.keys()]
+        file_params = [self.contents[item] for item in self.contents.keys()]
+
+        data_processor = PlotActivityContoursProcesser(*file_params, *params, file_extension=self.file_extension)
+        data_processor.generate_all_data()
+        
+        conditions = data_processor.conditions
+
+        data_plotter = PlotActivityContoursPlot(data_processor)
+        return [data_plotter.generate_contour_roi_plot(), data_plotter.generate_activityname_contours(), data_plotter.generate_bar_graph()], conditions
+
+    def generate_full_output(self):
+        self.generate_params()
+        self.get_contents()
+        figs, conditions = self.generate_plots()
+
+        delete_folder(self.folder_id)
+
+        return self.fparams, figs, conditions
